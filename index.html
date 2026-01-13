@@ -1041,7 +1041,9 @@
     // Switch Camera/Mic instantly
     cameraSelect.addEventListener('change', startLocalStream);
     micSelect.addEventListener('change', startLocalStream);
-</script>'; 
+<script>
+    // 1. CONFIG: Paste your localtunnel link here!
+    const TUNNEL_URL = 'https://YOUR-SUBDOMAIN-HERE.loca.lt'; 
 
     const landingPage = document.getElementById('landingPage');
     const chatPage = document.getElementById('chatPage');
@@ -1063,22 +1065,25 @@
     const regionSelect = document.getElementById('regionSelect');
     const currentRegion = document.getElementById('currentRegion');
     const demoMode = document.getElementById('demoMode');
-    const micBars = document.getElementById('micBars').children;
 
     let ws = null;
     let localStream = null;
     let peerConnection = null;
     let isDemoMode = false;
 
+    // ADDED: Better ICE Servers to punch through firewalls
     const rtcConfig = {
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+        ],
+        iceCandidatePoolSize: 10
     };
 
-    // --- UTILS ---
-    function updateStatus(text, count = true) {
+    function updateStatus(text) {
         const onlineCount = Math.floor(Math.random() * (150000 - 140000) + 140000);
-        const peopleText = count ? `<span style="float:right; opacity:0.7;">${onlineCount.toLocaleString()} users online</span>` : '';
-        statusBar.innerHTML = `<span class="status-indicator"></span><span>${text}</span> ${peopleText}`;
+        statusBar.innerHTML = `<span class="status-indicator"></span><span>${text}</span> <span style="float:right; opacity:0.7;">${onlineCount.toLocaleString()} users online</span>`;
     }
 
     function addMessage(type, text) {
@@ -1089,44 +1094,23 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // --- HARDWARE ---
-    async function setupHardware() {
-        try {
-            // Populate dropdowns from the actual device list
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            cameraSelect.innerHTML = devices.filter(d => d.kind === 'videoinput').map(d => `<option value="${d.deviceId}">${d.label || 'Camera'}</option>`).join('');
-            micSelect.innerHTML = devices.filter(d => d.kind === 'audioinput').map(d => `<option value="${d.deviceId}">${d.label || 'Microphone'}</option>`).join('');
-
-            // Copy regions to sidebar
-            currentRegion.innerHTML = regionSelect.innerHTML;
-            currentRegion.value = regionSelect.value;
-
-            await startLocalStream();
-        } catch (e) {
-            addMessage('system', 'Hardware error: Please allow camera/mic access.');
-        }
-    }
-
     async function startLocalStream() {
         if (localStream) localStream.getTracks().forEach(t => t.stop());
-        
         const constraints = {
             video: cameraSelect.value ? { deviceId: { exact: cameraSelect.value } } : true,
             audio: micSelect.value ? { deviceId: { exact: micSelect.value } } : true
         };
-
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        localVideo.srcObject = localStream;
-        localContainer.classList.add('camera-on');
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia(constraints);
+            localVideo.srcObject = localStream;
+            localContainer.classList.add('camera-on');
+        } catch (e) {
+            console.error("Camera error:", e);
+        }
     }
 
-    // --- WEBRTC & SOCKET ---
     function connect() {
-        if (isDemoMode) {
-            updateStatus('Demo Mode Active');
-            return;
-        }
-
+        if (isDemoMode) { updateStatus('Demo Mode Active'); return; }
         const wsUrl = TUNNEL_URL.replace('https', 'wss');
         ws = new WebSocket(wsUrl);
 
@@ -1137,7 +1121,6 @@
 
         ws.onmessage = async (e) => {
             const data = JSON.parse(e.data);
-            
             if (data.type === 'match') {
                 updateStatus('Partner Found!');
                 chatInput.disabled = false;
@@ -1153,7 +1136,7 @@
                         ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: answer }));
                     }
                 } else if (data.candidate) {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    try { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e){}
                 }
             }
             if (data.type === 'message') addMessage('stranger', data.text);
@@ -1165,15 +1148,15 @@
         if (peerConnection) peerConnection.close();
         peerConnection = new RTCPeerConnection(rtcConfig);
 
-        // Add tracks BEFORE creating offer (Fixes Black Screen)
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
         peerConnection.ontrack = (event) => {
-            remoteVideo.srcObject = event.streams[0];
-            remoteVideo.onloadedmetadata = () => {
+            // FIX: Assign stream to remote video immediately
+            if (remoteVideo.srcObject !== event.streams[0]) {
+                remoteVideo.srcObject = event.streams[0];
                 remoteContainer.classList.add('camera-on');
                 remoteStatus.classList.add('active');
-            };
+            }
         };
 
         peerConnection.onicecandidate = (event) => {
@@ -1182,8 +1165,15 @@
             }
         };
 
+        // Handle connection state changes (Debug/Fix black screen)
+        peerConnection.onconnectionstatechange = () => {
+            if (peerConnection.connectionState === 'connected') {
+                updateStatus('Connected!');
+            }
+        };
+
         if (isInitiator) {
-            const offer = await peerConnection.createOffer();
+            const offer = await peerConnection.createOffer({ offerToReceiveVideo: true, offerToReceiveAudio: true });
             await peerConnection.setLocalDescription(offer);
             ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
         }
@@ -1199,20 +1189,28 @@
         sendBtn.disabled = true;
     }
 
-    // --- CONTROLS ---
     startButton.addEventListener('click', async () => {
         isDemoMode = demoMode.checked;
         landingPage.style.display = 'none';
         chatPage.style.display = 'block';
-        updateStatus('Initializing...');
-        await setupHardware();
+        
+        // Populate Regions instantly
+        currentRegion.innerHTML = regionSelect.innerHTML;
+        currentRegion.value = regionSelect.value;
+        
+        await navigator.mediaDevices.enumerateDevices().then(devices => {
+            cameraSelect.innerHTML = devices.filter(d => d.kind === 'videoinput').map(d => `<option value="${d.deviceId}">${d.label || 'Camera'}</option>`).join('');
+            micSelect.innerHTML = devices.filter(d => d.kind === 'audioinput').map(d => `<option value="${d.deviceId}">${d.label || 'Mic'}</option>`).join('');
+        });
+
+        await startLocalStream();
         connect();
     });
 
     nextBtn.addEventListener('click', () => {
         cleanUpRTC();
         chatMessages.innerHTML = '';
-        if (ws) ws.send(JSON.stringify({ type: 'find' }));
+        if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'find' }));
         updateStatus('Searching...');
     });
 
