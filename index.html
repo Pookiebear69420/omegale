@@ -967,40 +967,80 @@
             };
         }
 
-        async function initRTC(isInitiator, pid) {
-            peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+async function initRTC(isInitiator, pid) {
+    // Added STUN servers to help bypass firewalls
+    const configuration = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+    };
+
+    peerConnection = new RTCPeerConnection(configuration);
+    
+    // Attach your camera/mic to the connection
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    peerConnection.ontrack = e => {
+        console.log("Receiving remote stream...");
+        remoteVideo.srcObject = e.streams[0];
+        remoteContainer.classList.add('camera-on');
+        remoteStatus.classList.add('active');
+    };
+
+    peerConnection.onicecandidate = e => {
+        if (e.candidate) {
+            ws.send(JSON.stringify({ type: 'signal', pid, candidate: e.candidate }));
+        }
+    };
+
+    if (isInitiator) {
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
+    }
+}
+async function handleSignal(data) {
+    if (data.sdp) {
+        // If peerConnection doesn't exist yet (for the person receiving the offer)
+        if (!peerConnection) {
+            const configuration = {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' }
+                ]
+            };
+            peerConnection = new RTCPeerConnection(configuration);
+
+            // Attach local camera/mic
             localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
+            // Set up the remote video display
             peerConnection.ontrack = e => {
                 remoteVideo.srcObject = e.streams[0];
                 remoteContainer.classList.add('camera-on');
                 remoteStatus.classList.add('active');
             };
 
+            // Set up ICE candidate forwarding
             peerConnection.onicecandidate = e => {
-                if (e.candidate) ws.send(JSON.stringify({ type: 'signal', pid, candidate: e.candidate }));
+                if (e.candidate) ws.send(JSON.stringify({ type: 'signal', pid: 'partner', candidate: e.candidate }));
             };
-
-            if (isInitiator) {
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
-            }
         }
 
-        async function handleSignal(data) {
-            if (data.sdp) {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-                if (data.sdp.type === 'offer') {
-                    const ans = await peerConnection.createAnswer();
-                    await peerConnection.setLocalDescription(ans);
-                    ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: ans }));
-                }
-            } else if (data.candidate) {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        
+        if (data.sdp.type === 'offer') {
+            const ans = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(ans);
+            ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: ans }));
         }
-
+    } else if (data.candidate && peerConnection) {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    }
+}
         function handleDisconnect() {
             addMessage('system', 'Stranger disconnected.');
             if (peerConnection) peerConnection.close();
