@@ -828,199 +828,217 @@
     </div>
 
 <script>
-        // --- 1. CONFIG: Update this to match your terminal ---
-        const TUNNEL_URL = 'https://cold-kings-lose.loca.lt'; 
+    // 1. CONFIG: Paste your localtunnel link here!
+    const TUNNEL_URL = 'https://sweet-bananas-live.loca.lt'; 
 
-        // DOM Elements
-        const landingPage = document.getElementById('landingPage');
-        const chatPage = document.getElementById('chatPage');
-        const startButton = document.getElementById('startButton');
-        const statusBar = document.getElementById('statusBar');
-        const chatMessages = document.getElementById('chatMessages');
-        const chatInput = document.getElementById('chatInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
-        const localContainer = document.getElementById('localContainer');
-        const remoteContainer = document.getElementById('remoteContainer');
-        const localStatus = document.getElementById('localStatus');
-        const remoteStatus = document.getElementById('remoteStatus');
-        const cameraSelect = document.getElementById('cameraSelect');
-        const micSelect = document.getElementById('micSelect');
-        const micBars = document.getElementById('micBars').children;
-        const reportBtn = document.getElementById('reportBtn');
-        const demoModeCheckbox = document.getElementById('demoMode');
+    // DOM Elements
+    const landingPage = document.getElementById('landingPage');
+    const chatPage = document.getElementById('chatPage');
+    const startButton = document.getElementById('startButton');
+    const statusBar = document.getElementById('statusBar');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const localContainer = document.getElementById('localContainer');
+    const remoteContainer = document.getElementById('remoteContainer');
+    const localStatus = document.getElementById('localStatus');
+    const remoteStatus = document.getElementById('remoteStatus');
+    const cameraSelect = document.getElementById('cameraSelect');
+    const micSelect = document.getElementById('micSelect');
+    const regionSelect = document.getElementById('regionSelect');
+    const currentRegion = document.getElementById('currentRegion');
+    const demoMode = document.getElementById('demoMode');
+    const reportBtn = document.getElementById('reportBtn');
+    const micBars = document.getElementById('micBars').children;
 
-        let ws = null;
-        let localStream = null;
-        let peerConnection = null;
-        let audioContext = null;
-        let analyser = null;
-        let isDemoMode = false;
+    let ws = null;
+    let localStream = null;
+    let peerConnection = null;
+    let audioContext, analyser, dataArray;
+    let isDemoMode = false;
 
-        // WebRTC Config
-        const rtcConfig = {
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }]
+    // WebRTC STUN Servers (Helps find the path between two computers)
+    const rtcConfig = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+    };
+
+    // --- UI & THEME LOGIC ---
+    document.querySelectorAll('.theme-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+            document.documentElement.setAttribute('data-theme', opt.dataset.theme);
+        });
+    });
+
+    function addMessage(type, text) {
+        const div = document.createElement('div');
+        div.className = `message ${type}`;
+        const prefix = type === 'you' ? 'You: ' : type === 'stranger' ? 'Stranger: ' : '';
+        div.textContent = prefix + text;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // --- HARDWARE LOGIC (Camera/Mic) ---
+    async function getDevices() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        cameraSelect.innerHTML = devices.filter(d => d.kind === 'videoinput').map(d => `<option value="${d.deviceId}">${d.label || 'Camera'}</option>`).join('');
+        micSelect.innerHTML = devices.filter(d => d.kind === 'audioinput').map(d => `<option value="${d.deviceId}">${d.label || 'Mic'}</option>`).join('');
+        
+        // Populate Sidebar Region dropdown
+        currentRegion.innerHTML = regionSelect.innerHTML;
+        currentRegion.value = regionSelect.value;
+    }
+
+    async function startLocalStream() {
+        if (localStream) localStream.getTracks().forEach(t => t.stop());
+        
+        const constraints = {
+            video: { deviceId: cameraSelect.value ? { exact: cameraSelect.value } : undefined },
+            audio: { deviceId: micSelect.value ? { exact: micSelect.value } : undefined }
         };
 
-        // --- THEME LOGIC ---
-        document.querySelectorAll('.theme-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
-                document.documentElement.setAttribute('data-theme', opt.dataset.theme);
-            });
-        });
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        localVideo.srcObject = localStream;
+        localContainer.classList.add('camera-on');
+        
+        // Setup Mic Bars
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        audioContext.createMediaStreamSource(localStream).connect(analyser);
+        drawMicLevel();
+    }
 
-        // --- MIC ANIMATION LOGIC ---
-        function updateMicBars() {
-            if (!analyser) return;
-            const data = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(data);
-            const avg = data.reduce((a, b) => a + b) / data.length;
-            for (let i = 0; i < micBars.length; i++) {
-                const val = Math.max(2, (avg / 128) * 30 * (1 - Math.abs(i - 3) / 4));
-                micBars[i].style.height = val + 'px';
+    function drawMicLevel() {
+        if (!analyser) return;
+        requestAnimationFrame(drawMicLevel);
+        const data = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(data);
+        const avg = data.reduce((a, b) => a + b) / data.length;
+        for (let i = 0; i < micBars.length; i++) {
+            micBars[i].style.height = Math.max(2, (avg / 128) * 30) + 'px';
+        }
+    }
+
+    // --- CONNECTION LOGIC ---
+    function initConnection() {
+        if (isDemoMode) {
+            statusBar.innerHTML = '● Demo Mode Active';
+            return;
+        }
+
+        statusBar.innerHTML = 'Connecting to Laptop...';
+        const wsUrl = TUNNEL_URL.replace('https', 'wss');
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+            statusBar.innerHTML = '● Online & Searching';
+            ws.send(JSON.stringify({ type: 'find' }));
+        };
+
+        ws.onmessage = async (e) => {
+            const data = JSON.parse(e.data);
+            if (data.type === 'match') {
+                addMessage('system', 'Partner matched!');
+                chatInput.disabled = false;
+                sendBtn.disabled = false;
+                initRTC(data.init, data.pid);
             }
-            requestAnimationFrame(updateMicBars);
+            if (data.type === 'signal') handleSignal(data);
+            if (data.type === 'message') addMessage('stranger', data.text);
+            if (data.type === 'dis') handleDisconnect();
+        };
+
+        ws.onerror = () => statusBar.innerHTML = 'Server Offline (Check Tunnel URL)';
+    }
+
+    async function initRTC(isInitiator, pid) {
+        if (peerConnection) peerConnection.close();
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        
+        peerConnection.ontrack = (e) => {
+            remoteVideo.srcObject = e.streams[0];
+            remoteContainer.classList.add('camera-on');
+            remoteStatus.classList.add('active');
+        };
+
+        peerConnection.onicecandidate = (e) => {
+            if (e.candidate) ws.send(JSON.stringify({ type: 'signal', pid, candidate: e.candidate }));
+        };
+
+        if (isInitiator) {
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
         }
+    }
 
-        // --- MESSAGE LOGIC ---
-        function addMessage(type, text) {
-            const div = document.createElement('div');
-            div.className = `message ${type}`;
-            div.textContent = (type === 'you' ? 'You: ' : type === 'stranger' ? 'Stranger: ' : '') + text;
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // --- DEVICE LOGIC ---
-        async function setupDevices() {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            cameraSelect.innerHTML = devices.filter(d => d.kind === 'videoinput').map(d => `<option value="${d.deviceId}">${d.label || 'Camera'}</option>`).join('');
-            micSelect.innerHTML = devices.filter(d => d.kind === 'audioinput').map(d => `<option value="${d.deviceId}">${d.label || 'Mic'}</option>`).join('');
-            
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            localVideo.srcObject = localStream;
-            localContainer.classList.add('camera-on');
-            localStatus.classList.add('active');
-
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            audioContext.createMediaStreamSource(localStream).connect(analyser);
-            updateMicBars();
-        }
-
-        // --- NETWORKING LOGIC ---
-        function initConnection() {
-            if (isDemoMode) {
-                statusBar.innerHTML = '<span class="status-indicator active"></span><span>Demo Mode Active</span>';
-                setTimeout(() => addMessage('system', 'Matched with a simulated stranger...'), 1000);
-                return;
+    async function handleSignal(data) {
+        if (data.sdp) {
+            if (!peerConnection) await initRTC(false, 'partner');
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+            if (data.sdp.type === 'offer') {
+                const ans = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(ans);
+                ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: ans }));
             }
-
-            statusBar.innerHTML = '<span class="status-indicator"></span><span>Connecting to Laptop...</span>';
-            const wsUrl = TUNNEL_URL.replace('https', 'wss');
-            ws = new WebSocket(wsUrl);
-
-            ws.onopen = () => {
-                statusBar.innerHTML = '<span class="status-indicator active"></span><span>Online</span>';
-                ws.send(JSON.stringify({ type: 'find' }));
-            };
-
-            ws.onmessage = async (e) => {
-                const data = JSON.parse(e.data);
-                if (data.type === 'match') {
-                    addMessage('system', 'Partner found! Say hi.');
-                    chatInput.disabled = false;
-                    sendBtn.disabled = false;
-                    reportBtn.style.display = 'block';
-                    initRTC(data.init, data.pid);
-                }
-                if (data.type === 'signal') handleSignal(data);
-                if (data.type === 'message') addMessage('stranger', data.text);
-                if (data.type === 'dis') handleDisconnect();
-            };
-
-            ws.onerror = () => {
-                statusBar.innerHTML = '<span class="status-indicator" style="background:red"></span><span>Server Offline</span>';
-            };
+        } else if (data.candidate && peerConnection) {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
         }
+    }
 
-        async function initRTC(isInitiator, pid) {
-            peerConnection = new RTCPeerConnection(rtcConfig);
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-            
-            peerConnection.ontrack = e => {
-                remoteVideo.srcObject = e.streams[0];
-                remoteContainer.classList.add('camera-on');
-                remoteStatus.classList.add('active');
-            };
+    function handleDisconnect() {
+        addMessage('system', 'Stranger left.');
+        if (peerConnection) peerConnection.close();
+        peerConnection = null;
+        remoteVideo.srcObject = null;
+        remoteContainer.classList.remove('camera-on');
+        remoteStatus.classList.remove('active');
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+    }
 
-            peerConnection.onicecandidate = e => {
-                if (e.candidate) ws.send(JSON.stringify({ type: 'signal', pid, candidate: e.candidate }));
-            };
+    // --- BUTTON CLICKS ---
+    startButton.addEventListener('click', async () => {
+        isDemoMode = demoMode.checked;
+        landingPage.style.display = 'none';
+        chatPage.style.display = 'block';
+        await getDevices();
+        await startLocalStream();
+        initConnection();
+    });
 
-            if (isInitiator) {
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
-            }
+    sendBtn.addEventListener('click', () => {
+        const text = chatInput.value.trim();
+        if (text && ws) {
+            ws.send(JSON.stringify({ type: 'message', text }));
+            addMessage('you', text);
+            chatInput.value = '';
         }
+    });
 
-        async function handleSignal(data) {
-            if (data.sdp) {
-                if (!peerConnection) await initRTC(false, 'partner');
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-                if (data.sdp.type === 'offer') {
-                    const ans = await peerConnection.createAnswer();
-                    await peerConnection.setLocalDescription(ans);
-                    ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: ans }));
-                }
-            } else if (data.candidate && peerConnection) {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
-        }
+    nextBtn.addEventListener('click', () => {
+        handleDisconnect();
+        chatMessages.innerHTML = '';
+        if (ws) ws.send(JSON.stringify({ type: 'find' }));
+        addMessage('system', 'Searching...');
+    });
 
-        function handleDisconnect() {
-            addMessage('system', 'Stranger disconnected.');
-            if (peerConnection) peerConnection.close();
-            peerConnection = null;
-            remoteVideo.srcObject = null;
-            remoteContainer.classList.remove('camera-on');
-            remoteStatus.classList.remove('active');
-            reportBtn.style.display = 'none';
-        }
+    stopBtn.addEventListener('click', () => location.reload());
 
-        // --- BUTTON EVENTS ---
-        startButton.addEventListener('click', async () => {
-            isDemoMode = demoModeCheckbox.checked;
-            landingPage.style.display = 'none';
-            chatPage.style.display = 'block';
-            await setupDevices();
-            initConnection();
-        });
-
-        sendBtn.addEventListener('click', () => {
-            const text = chatInput.value.trim();
-            if (text && ws) {
-                ws.send(JSON.stringify({ type: 'message', text }));
-                addMessage('you', text);
-                chatInput.value = '';
-            }
-        });
-
-        nextBtn.addEventListener('click', () => {
-            handleDisconnect();
-            chatMessages.innerHTML = '';
-            if (ws) ws.send(JSON.stringify({ type: 'find' }));
-            addMessage('system', 'Searching...');
-        });
-
-        stopBtn.addEventListener('click', () => location.reload());
-
-    </script>
+    // Switch Camera/Mic instantly
+    cameraSelect.addEventListener('change', startLocalStream);
+    micSelect.addEventListener('change', startLocalStream);
+</script>
 </body>
 </html>
