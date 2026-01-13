@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatConnect - Talk to Strangers</title>
+    <title>Omegale</title>
     <style>
         * {
             margin: 0;
@@ -13,117 +13,85 @@
 
         body {
             font-family: Arial, sans-serif;
-            background: #f0f0f0;
-            color: #333;
+            background: #1a1a1a;
+            color: #fff;
+            overflow: hidden;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        .landing-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             padding: 20px;
         }
 
-        .header {
-            background: #fff;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #ddd;
+        .logo {
+            font-size: 72px;
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .header h1 {
-            color: #0066cc;
-            font-size: 32px;
-            margin-bottom: 10px;
+        .rules {
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 40px;
         }
 
-        .header p {
-            color: #666;
+        .rules-text {
+            color: #ff3333;
             font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 30px;
         }
 
-        .rules-page, .chat-page {
-            background: #fff;
-            padding: 30px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        .start-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .start-button:hover {
+            background: #45a049;
         }
 
         .chat-page {
             display: none;
-        }
-
-        h2 {
-            color: #0066cc;
-            margin-bottom: 15px;
-            font-size: 24px;
-        }
-
-        .rules-list {
-            margin: 20px 0;
-            line-height: 1.8;
-        }
-
-        .rules-list li {
-            margin-bottom: 10px;
-        }
-
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 3px;
-        }
-
-        .warning strong {
-            color: #856404;
-        }
-
-        .checkboxes {
-            margin: 25px 0;
-        }
-
-        .checkbox-item {
-            margin: 12px 0;
-        }
-
-        .checkbox-item input {
-            margin-right: 8px;
-        }
-
-        .btn {
-            background: #0066cc;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 16px;
-            border-radius: 3px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            background: #0052a3;
-        }
-
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+            height: 100vh;
+            background: #000;
         }
 
         .chat-container {
             display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
+            height: 100vh;
+        }
+
+        .video-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #000;
+        }
+
+        .videos {
+            flex: 1;
+            display: flex;
+            position: relative;
         }
 
         .video-container {
             flex: 1;
-            background: #000;
-            border-radius: 5px;
-            overflow: hidden;
             position: relative;
-            aspect-ratio: 4/3;
+            background: #111;
         }
 
         video {
@@ -134,183 +102,286 @@
 
         .video-label {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.7);
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        .controls-bottom {
+            background: #1a1a1a;
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .control-btn {
+            background: #ff6b35;
             color: white;
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 12px;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: #ff5520;
+            transform: scale(1.05);
+        }
+
+        .control-btn.stop {
+            background: #e74c3c;
+        }
+
+        .control-btn.stop:hover {
+            background: #c0392b;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            border-left: 2px solid #333;
+        }
+
+        .settings-section {
+            padding: 20px;
+            border-bottom: 2px solid #333;
+        }
+
+        .settings-section h3 {
+            color: #ff6b35;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .setting-item {
+            margin-bottom: 15px;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .setting-item select {
+            width: 100%;
+            padding: 8px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
         }
 
         .chat-messages {
-            height: 300px;
-            border: 1px solid #ddd;
-            padding: 15px;
+            flex: 1;
             overflow-y: auto;
             margin-bottom: 15px;
-            background: #fafafa;
-            border-radius: 3px;
+            padding: 10px;
+            background: #0a0a0a;
+            border-radius: 8px;
         }
 
         .message {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             line-height: 1.5;
+            font-size: 14px;
         }
 
         .message.stranger {
-            color: #cc0000;
+            color: #3498db;
         }
 
         .message.you {
-            color: #0066cc;
+            color: #2ecc71;
         }
 
         .message.system {
-            color: #666;
+            color: #95a5a6;
             font-style: italic;
+            font-size: 13px;
         }
 
-        .chat-input-container {
+        .chat-input-area {
             display: flex;
             gap: 10px;
         }
 
         .chat-input {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
+            padding: 12px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 6px;
             font-size: 14px;
         }
 
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
+        .send-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
-        .btn-secondary {
-            background: #6c757d;
+        .send-btn:hover {
+            background: #2980b9;
         }
 
-        .btn-secondary:hover {
-            background: #5a6268;
+        .send-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
         }
 
-        .btn-danger {
-            background: #dc3545;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .status {
-            padding: 15px;
-            background: #e7f3ff;
-            border: 1px solid #b3d9ff;
-            border-radius: 3px;
-            margin-bottom: 20px;
+        .status-bar {
+            background: #2a2a2a;
+            padding: 12px 20px;
             text-align: center;
+            color: #aaa;
+            font-size: 14px;
+            border-bottom: 2px solid #333;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 300px;
+            }
         }
 
         @media (max-width: 768px) {
             .chat-container {
                 flex-direction: column;
             }
+            
+            .sidebar {
+                width: 100%;
+                border-left: none;
+                border-top: 2px solid #333;
+            }
+            
+            .videos {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>ChatConnect</h1>
-        <p>Talk to strangers online</p>
-    </div>
-
-    <div class="container">
-        <div class="rules-page" id="rulesPage">
-            <h2>Welcome to ChatConnect</h2>
-            
-            <p>ChatConnect lets you chat with random strangers online. Please read and accept the rules before continuing.</p>
-
-            <div class="warning">
-                <strong>WARNING:</strong> You may encounter nudity, sexual content, or other inappropriate behavior. Use at your own risk.
+    <div class="landing-page" id="landingPage">
+        <div class="logo">Omegale</div>
+        
+        <div class="rules">
+            <div class="rules-text">
+                By pressing "Start", you agree to our rules. Rule violators will be banned. Please keep your face visible in the camera frame.<br><br>
+                You must be 18 or older. No nudity or sexual content. No harassment. Be respectful. Do not share personal information. Recording without consent may be illegal.
             </div>
-
-            <h2>Rules and Guidelines</h2>
-            <ol class="rules-list">
-                <li>You must be 18 years or older to use this service.</li>
-                <li>Nudity and sexually explicit conduct are prohibited in the video chat section.</li>
-                <li>Do not broadcast copyrighted content or music.</li>
-                <li>Be respectful. No harassment, threats, or bullying.</li>
-                <li>Do not share personal information such as your full name, address, or phone number.</li>
-                <li>Recording or screenshotting chats without consent may be illegal in your area.</li>
-                <li>Report any illegal activity to the appropriate authorities.</li>
-                <li>We do not monitor chats but may record and report illegal activity.</li>
-            </ol>
-
-            <div class="checkboxes">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="age18">
-                    <label for="age18">I am 18 years or older</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="acceptRules">
-                    <label for="acceptRules">I have read and agree to follow the rules</label>
-                </div>
-            </div>
-
-            <button class="btn" id="startBtn" disabled>Start Chatting</button>
         </div>
 
-        <div class="chat-page" id="chatPage">
-            <div class="status" id="status">Connecting to server...</div>
+        <button class="start-button" id="startButton">Start</button>
+    </div>
 
-            <div class="chat-container">
-                <div class="video-container">
-                    <video id="localVideo" autoplay muted playsinline></video>
-                    <div class="video-label">You</div>
+    <div class="chat-page" id="chatPage">
+        <div class="status-bar" id="statusBar">Connecting...</div>
+        
+        <div class="chat-container">
+            <div class="video-section">
+                <div class="videos">
+                    <div class="video-container">
+                        <video id="localVideo" autoplay muted playsinline></video>
+                        <div class="video-label">You</div>
+                    </div>
+                    <div class="video-container">
+                        <video id="remoteVideo" autoplay playsinline></video>
+                        <div class="video-label">Stranger</div>
+                    </div>
                 </div>
-                <div class="video-container">
-                    <video id="remoteVideo" autoplay playsinline></video>
-                    <div class="video-label">Stranger</div>
+                
+                <div class="controls-bottom">
+                    <button class="control-btn" id="nextBtn">Next</button>
+                    <button class="control-btn stop" id="stopBtn">Stop</button>
                 </div>
             </div>
 
-            <div class="chat-messages" id="messages"></div>
+            <div class="sidebar">
+                <div class="settings-section">
+                    <h3>Settings</h3>
+                    
+                    <div class="setting-item">
+                        <label for="cameraSelect">Camera</label>
+                        <select id="cameraSelect">
+                            <option>Loading cameras...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="micSelect">Microphone</label>
+                        <select id="micSelect">
+                            <option>Loading microphones...</option>
+                        </select>
+                    </div>
+                </div>
 
-            <div class="chat-input-container">
-                <input type="text" class="chat-input" id="messageInput" placeholder="Type a message..." disabled>
-                <button class="btn" id="sendBtn" disabled>Send</button>
-            </div>
-
-            <div class="controls">
-                <button class="btn btn-secondary" id="newChatBtn">New Chat</button>
-                <button class="btn btn-danger" id="stopBtn">Stop</button>
+                <div class="chat-section">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    
+                    <div class="chat-input-area">
+                        <input 
+                            type="text" 
+                            class="chat-input" 
+                            id="chatInput" 
+                            placeholder="Type a message..."
+                            disabled
+                        >
+                        <button class="send-btn" id="sendBtn" disabled>Send</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const rulesPage = document.getElementById('rulesPage');
+        const landingPage = document.getElementById('landingPage');
         const chatPage = document.getElementById('chatPage');
-        const startBtn = document.getElementById('startBtn');
-        const age18 = document.getElementById('age18');
-        const acceptRules = document.getElementById('acceptRules');
-        const status = document.getElementById('status');
-        const messages = document.getElementById('messages');
-        const messageInput = document.getElementById('messageInput');
+        const startButton = document.getElementById('startButton');
+        const statusBar = document.getElementById('statusBar');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
-        const newChatBtn = document.getElementById('newChatBtn');
+        const nextBtn = document.getElementById('nextBtn');
         const stopBtn = document.getElementById('stopBtn');
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
+        const cameraSelect = document.getElementById('cameraSelect');
+        const micSelect = document.getElementById('micSelect');
 
         let ws = null;
         let localStream = null;
         let peerConnection = null;
         let partnerId = null;
+        let currentCamera = null;
+        let currentMic = null;
+
         const servers = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
@@ -318,24 +389,80 @@
             ]
         };
 
-        age18.addEventListener('change', checkRules);
-        acceptRules.addEventListener('change', checkRules);
-
-        function checkRules() {
-            startBtn.disabled = !(age18.checked && acceptRules.checked);
-        }
-
-        startBtn.addEventListener('click', () => {
-            rulesPage.style.display = 'none';
+        startButton.addEventListener('click', async () => {
+            landingPage.style.display = 'none';
             chatPage.style.display = 'block';
-            initChat();
+            await initChat();
         });
 
-        async function initChat() {
+        async function getDevices() {
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: true, 
-                    audio: true 
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                
+                const cameras = devices.filter(d => d.kind === 'videoinput');
+                const mics = devices.filter(d => d.kind === 'audioinput');
+
+                cameraSelect.innerHTML = cameras.map((cam, i) => 
+                    `<option value="${cam.deviceId}">${cam.label || 'Camera ' + (i + 1)}</option>`
+                ).join('');
+
+                micSelect.innerHTML = mics.map((mic, i) => 
+                    `<option value="${mic.deviceId}">${mic.label || 'Microphone ' + (i + 1)}</option>`
+                ).join('');
+
+                if (cameras.length > 0) currentCamera = cameras[0].deviceId;
+                if (mics.length > 0) currentMic = mics[0].deviceId;
+
+            } catch (err) {
+                console.error('Error getting devices:', err);
+            }
+        }
+
+        cameraSelect.addEventListener('change', async () => {
+            currentCamera = cameraSelect.value;
+            await restartLocalStream();
+        });
+
+        micSelect.addEventListener('change', async () => {
+            currentMic = micSelect.value;
+            await restartLocalStream();
+        });
+
+        async function restartLocalStream() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: currentCamera ? { deviceId: { exact: currentCamera } } : true,
+                    audio: currentMic ? { deviceId: { exact: currentMic } } : true
+                });
+                
+                localVideo.srcObject = localStream;
+
+                if (peerConnection) {
+                    const videoTrack = localStream.getVideoTracks()[0];
+                    const audioTrack = localStream.getAudioTracks()[0];
+                    
+                    const videoSender = peerConnection.getSenders().find(s => s.track?.kind === 'video');
+                    const audioSender = peerConnection.getSenders().find(s => s.track?.kind === 'audio');
+                    
+                    if (videoSender && videoTrack) videoSender.replaceTrack(videoTrack);
+                    if (audioSender && audioTrack) audioSender.replaceTrack(audioTrack);
+                }
+            } catch (err) {
+                addMessage('system', 'Error accessing camera/microphone');
+            }
+        }
+
+        async function initChat() {
+            await getDevices();
+            
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: currentCamera ? { deviceId: { exact: currentCamera } } : true,
+                    audio: currentMic ? { deviceId: { exact: currentMic } } : true
                 });
                 localVideo.srcObject = localStream;
                 
@@ -354,7 +481,7 @@
             ws = new WebSocket(wsUrl);
             
             ws.onopen = () => {
-                status.textContent = 'Looking for someone to chat with...';
+                statusBar.textContent = 'Looking for someone...';
                 ws.send(JSON.stringify({ type: 'find_partner' }));
             };
 
@@ -364,10 +491,10 @@
                 switch(data.type) {
                     case 'partner_found':
                         partnerId = data.partnerId;
-                        status.textContent = 'Connected to stranger. Say hi!';
-                        messageInput.disabled = false;
+                        statusBar.textContent = 'Connected. Say hi!';
+                        chatInput.disabled = false;
                         sendBtn.disabled = false;
-                        addMessage('system', 'You are now chatting with a random stranger.');
+                        addMessage('system', 'You are now chatting with a stranger.');
                         
                         if (data.initiator && localStream) {
                             createOffer();
@@ -375,7 +502,7 @@
                         break;
                         
                     case 'partner_disconnected':
-                        addMessage('system', 'Stranger has disconnected.');
+                        addMessage('system', 'Stranger disconnected.');
                         resetConnection();
                         break;
                         
@@ -400,19 +527,15 @@
                             await peerConnection.addIceCandidate(data.candidate);
                         }
                         break;
-                        
-                    case 'waiting':
-                        status.textContent = 'Looking for someone to chat with...';
-                        break;
                 }
             };
 
             ws.onerror = () => {
-                status.textContent = 'Connection error. Please refresh.';
+                statusBar.textContent = 'Connection error';
             };
 
             ws.onclose = () => {
-                status.textContent = 'Disconnected. Please refresh.';
+                statusBar.textContent = 'Disconnected';
             };
         }
 
@@ -484,7 +607,7 @@
         }
 
         function sendMessage() {
-            const msg = messageInput.value.trim();
+            const msg = chatInput.value.trim();
             if (msg && ws && partnerId) {
                 ws.send(JSON.stringify({
                     type: 'message',
@@ -492,28 +615,27 @@
                     to: partnerId
                 }));
                 addMessage('you', msg);
-                messageInput.value = '';
+                chatInput.value = '';
             }
         }
 
         sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
+        chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
 
-        newChatBtn.addEventListener('click', () => {
+        nextBtn.addEventListener('click', () => {
             resetConnection();
+            chatMessages.innerHTML = '';
             ws.send(JSON.stringify({ type: 'find_partner' }));
-            status.textContent = 'Looking for someone to chat with...';
-            messages.innerHTML = '';
+            statusBar.textContent = 'Looking for someone...';
         });
 
         stopBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to stop and return to the rules page?')) {
-                cleanup();
-                chatPage.style.display = 'none';
-                rulesPage.style.display = 'block';
-            }
+            cleanup();
+            chatPage.style.display = 'none';
+            landingPage.style.display = 'flex';
+            chatMessages.innerHTML = '';
         });
 
         function resetConnection() {
@@ -523,9 +645,9 @@
             }
             remoteVideo.srcObject = null;
             partnerId = null;
-            messageInput.disabled = true;
+            chatInput.disabled = true;
             sendBtn.disabled = true;
-            status.textContent = 'Disconnected';
+            statusBar.textContent = 'Disconnected';
         }
 
         function cleanup() {
@@ -546,8 +668,8 @@
             msg.className = `message ${type}`;
             const prefix = type === 'stranger' ? 'Stranger: ' : type === 'you' ? 'You: ' : '';
             msg.textContent = prefix + text;
-            messages.appendChild(msg);
-            messages.scrollTop = messages.scrollHeight;
+            chatMessages.appendChild(msg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         window.addEventListener('beforeunload', cleanup);
