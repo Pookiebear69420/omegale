@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Omegale</title>
+    <title>Omegale - Talk to Strangers</title>
     <style>
         * {
             margin: 0;
@@ -112,6 +112,25 @@
             z-index: 10;
         }
 
+        .report-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(220, 53, 69, 0.4);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 13px;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .report-btn:hover {
+            background: rgba(220, 53, 69, 0.7);
+        }
+
         .controls-bottom {
             background: #1a1a1a;
             padding: 20px;
@@ -183,6 +202,35 @@
             color: #fff;
             border-radius: 4px;
             font-size: 13px;
+        }
+
+        .mic-indicator {
+            margin-top: 10px;
+        }
+
+        .mic-label {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .mic-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 40px;
+            background: #0a0a0a;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .mic-bar {
+            flex: 1;
+            background: #2ecc71;
+            border-radius: 2px;
+            transition: height 0.1s;
+            min-height: 2px;
         }
 
         .chat-section {
@@ -264,6 +312,65 @@
             border-bottom: 2px solid #333;
         }
 
+        .report-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .report-modal.show {
+            display: flex;
+        }
+
+        .report-content {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .report-content h2 {
+            color: #ff6b35;
+            margin-bottom: 20px;
+        }
+
+        .report-content p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .report-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .report-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .confirm-report {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .cancel-report {
+            background: #555;
+            color: white;
+        }
+
         @media (max-width: 1024px) {
             .sidebar {
                 width: 300px;
@@ -314,6 +421,7 @@
                     <div class="video-container">
                         <video id="remoteVideo" autoplay playsinline></video>
                         <div class="video-label">Stranger</div>
+                        <button class="report-btn" id="reportBtn" style="display: none;">Report</button>
                     </div>
                 </div>
                 
@@ -340,6 +448,22 @@
                             <option>Loading microphones...</option>
                         </select>
                     </div>
+
+                    <div class="mic-indicator">
+                        <span class="mic-label">Microphone Level</span>
+                        <div class="mic-bars" id="micBars">
+                            <div class="mic-bar"></div>
+                            <div class="mic-bar"></div>
+                            <div class="mic-bar"></div>
+                            <div class="mic-bar"></div>
+                            <div class="mic-bar"></div>
+                            <div class="mic-bar"></div>
+                            <div class="mic-bar"></div>
+                            <div class="mic-bar"></div>
+                            <div class="mic-bar"></div>
+                            <div class="mic-bar"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="chat-section">
@@ -360,6 +484,18 @@
         </div>
     </div>
 
+    <div class="report-modal" id="reportModal">
+        <div class="report-content">
+            <h2>Report User</h2>
+            <p>Are you sure you want to report this user? Reports help keep Omegale safe.</p>
+            <p style="font-size: 12px; color: #aaa;">Users who receive multiple reports will be banned and must appeal to Pdawg0607@gmail.com</p>
+            <div class="report-buttons">
+                <button class="cancel-report" id="cancelReport">Cancel</button>
+                <button class="confirm-report" id="confirmReport">Report</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const landingPage = document.getElementById('landingPage');
         const chatPage = document.getElementById('chatPage');
@@ -374,6 +510,11 @@
         const remoteVideo = document.getElementById('remoteVideo');
         const cameraSelect = document.getElementById('cameraSelect');
         const micSelect = document.getElementById('micSelect');
+        const reportBtn = document.getElementById('reportBtn');
+        const reportModal = document.getElementById('reportModal');
+        const cancelReport = document.getElementById('cancelReport');
+        const confirmReport = document.getElementById('confirmReport');
+        const micBars = document.getElementById('micBars').children;
 
         let ws = null;
         let localStream = null;
@@ -381,6 +522,10 @@
         let partnerId = null;
         let currentCamera = null;
         let currentMic = null;
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        let animationFrame = null;
 
         const servers = {
             iceServers: [
@@ -428,9 +573,58 @@
             await restartLocalStream();
         });
 
+        function setupAudioAnalyser() {
+            if (!localStream) return;
+
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(localStream);
+                source.connect(analyser);
+                analyser.fftSize = 32;
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                updateMicLevel();
+            } catch (err) {
+                console.error('Error setting up audio analyser:', err);
+            }
+        }
+
+        function updateMicLevel() {
+            if (!analyser) return;
+
+            animationFrame = requestAnimationFrame(updateMicLevel);
+            analyser.getByteFrequencyData(dataArray);
+            
+            const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+            const normalized = Math.min(average / 128, 1);
+            
+            for (let i = 0; i < micBars.length; i++) {
+                const threshold = i / micBars.length;
+                if (normalized > threshold) {
+                    micBars[i].style.height = '100%';
+                    if (normalized > 0.7) {
+                        micBars[i].style.background = '#e74c3c';
+                    } else if (normalized > 0.4) {
+                        micBars[i].style.background = '#f39c12';
+                    } else {
+                        micBars[i].style.background = '#2ecc71';
+                    }
+                } else {
+                    micBars[i].style.height = '2px';
+                    micBars[i].style.background = '#2ecc71';
+                }
+            }
+        }
+
         async function restartLocalStream() {
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
+            }
+
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
             }
 
             try {
@@ -440,6 +634,7 @@
                 });
                 
                 localVideo.srcObject = localStream;
+                setupAudioAnalyser();
 
                 if (peerConnection) {
                     const videoTrack = localStream.getVideoTracks()[0];
@@ -465,6 +660,7 @@
                     audio: currentMic ? { deviceId: { exact: currentMic } } : true
                 });
                 localVideo.srcObject = localStream;
+                setupAudioAnalyser();
                 
                 connectWebSocket();
             } catch (err) {
@@ -494,6 +690,7 @@
                         statusBar.textContent = 'Connected. Say hi!';
                         chatInput.disabled = false;
                         sendBtn.disabled = false;
+                        reportBtn.style.display = 'block';
                         addMessage('system', 'You are now chatting with a stranger.');
                         
                         if (data.initiator && localStream) {
@@ -526,6 +723,11 @@
                         if (peerConnection && data.candidate) {
                             await peerConnection.addIceCandidate(data.candidate);
                         }
+                        break;
+
+                    case 'report_received':
+                        addMessage('system', 'Report submitted. Thank you for helping keep Omegale safe.');
+                        reportModal.classList.remove('show');
                         break;
                 }
             };
@@ -606,6 +808,23 @@
             }));
         }
 
+        reportBtn.addEventListener('click', () => {
+            reportModal.classList.add('show');
+        });
+
+        cancelReport.addEventListener('click', () => {
+            reportModal.classList.remove('show');
+        });
+
+        confirmReport.addEventListener('click', () => {
+            if (ws && partnerId) {
+                ws.send(JSON.stringify({
+                    type: 'report',
+                    reportedUser: partnerId
+                }));
+            }
+        });
+
         function sendMessage() {
             const msg = chatInput.value.trim();
             if (msg && ws && partnerId) {
@@ -647,6 +866,7 @@
             partnerId = null;
             chatInput.disabled = true;
             sendBtn.disabled = true;
+            reportBtn.style.display = 'none';
             statusBar.textContent = 'Disconnected';
         }
 
@@ -659,6 +879,12 @@
             if (ws) {
                 ws.close();
                 ws = null;
+            }
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            if (audioContext) {
+                audioContext.close();
             }
             localVideo.srcObject = null;
         }
