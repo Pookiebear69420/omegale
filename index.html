@@ -827,8 +827,10 @@
         </div>
     </div>
 
-    <script>
-		const TUNNEL_URL = 'https://legal-mammals-laugh.loca.lt';
+<script>
+        // --- CONFIG ---
+        const TUNNEL_URL = 'https://legal-mammals-laugh.loca.lt'; // Ensure this matches your tunnel link
+        
         const landingPage = document.getElementById('landingPage');
         const chatPage = document.getElementById('chatPage');
         const startButton = document.getElementById('startButton');
@@ -848,7 +850,6 @@
         const micSelect = document.getElementById('micSelect');
         const regionSelect = document.getElementById('regionSelect');
         const currentRegion = document.getElementById('currentRegion');
-        const demoMode = document.getElementById('demoMode');
         const reportBtn = document.getElementById('reportBtn');
         const reportModal = document.getElementById('reportModal');
         const cancelReport = document.getElementById('cancelReport');
@@ -856,32 +857,19 @@
         const micBars = document.getElementById('micBars').children;
         const themeOptions = document.querySelectorAll('.theme-option');
 
+        let ws = null;
         let localStream = null;
+        let peerConnection = null;
         let audioContext, analyser, dataArray;
-        let selectedRegion = 'any';
-        let isDemoMode = true;
-        let demoInterval = null;
+        let partnerID = 'partner';
 
-        const demoMessages = [
-            "Hey! How's it going?",
-            "Where are you from?",
-            "What are you up to today?",
-            "This is pretty cool!",
-            "Have you used this before?",
-            "Nice to meet you!",
-            "What do you like to do for fun?",
-            "The weather is great here",
-            "Do you have any hobbies?",
-            "This demo mode is working well!"
-        ];
-
+        // --- THEME LOGIC ---
         themeOptions.forEach(option => {
             option.addEventListener('click', () => {
                 const theme = option.dataset.theme;
                 document.body.dataset.theme = theme;
                 themeOptions.forEach(t => t.classList.remove('active'));
                 option.classList.add('active');
-                addMessage('system', `Theme: ${theme}`);
             });
         });
 
@@ -894,81 +882,40 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        // --- DEVICE LOGIC ---
         async function getDevices() {
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const cameras = devices.filter(d => d.kind === 'videoinput');
-                const mics = devices.filter(d => d.kind === 'audioinput');
-                
-                cameraSelect.innerHTML = cameras.length > 0 
-                    ? cameras.map((c, i) => `<option value="${c.deviceId}">${c.label || `Camera ${i + 1}`}</option>`).join('')
-                    : '<option>No cameras found</option>';
-                    
-                micSelect.innerHTML = mics.length > 0
-                    ? mics.map((m, i) => `<option value="${m.deviceId}">${m.label || `Mic ${i + 1}`}</option>`).join('')
-                    : '<option>No microphones found</option>';
-
-                addMessage('system', `Found ${cameras.length} camera(s), ${mics.length} mic(s)`);
-            } catch (err) {
-                console.error('Error getting devices:', err);
-                addMessage('system', 'Error accessing devices.');
-            }
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const cameras = devices.filter(d => d.kind === 'videoinput');
+            const mics = devices.filter(d => d.kind === 'audioinput');
+            cameraSelect.innerHTML = cameras.map((c, i) => `<option value="${c.deviceId}">${c.label || `Camera ${i + 1}`}</option>`).join('');
+            micSelect.innerHTML = mics.map((m, i) => `<option value="${m.deviceId}">${m.label || `Mic ${i + 1}`}</option>`).join('');
         }
 
         async function startLocalStream() {
-            if (localStream) {
-                localStream.getTracks().forEach(t => t.stop());
-            }
-            
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
             try {
-                const constraints = {
-                    video: { 
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: { 
-                        echoCancellation: true,
-                        noiseSuppression: true
-                    }
-                };
-
-                // Add device IDs if specific devices are selected
-                if (cameraSelect.value && cameraSelect.value !== 'No cameras found') {
-                    constraints.video.deviceId = { ideal: cameraSelect.value };
-                }
-                if (micSelect.value && micSelect.value !== 'No microphones found') {
-                    constraints.audio.deviceId = { ideal: micSelect.value };
-                }
-
-                localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: cameraSelect.value ? { exact: cameraSelect.value } : undefined },
+                    audio: { deviceId: micSelect.value ? { exact: micSelect.value } : undefined }
+                });
                 localVideo.srcObject = localStream;
                 localContainer.classList.add('camera-on');
                 localStatus.classList.add('active');
                 setupMicLevel();
             } catch (err) {
-                console.error('Camera access error:', err);
                 localContainer.classList.remove('camera-on');
-                localStatus.classList.remove('active');
-                addMessage('system', 'Camera/mic access denied.');
+                addMessage('system', 'Camera/Mic access denied.');
             }
         }
 
         function setupMicLevel() {
-            try {
-                if (audioContext) {
-                    audioContext.close();
-                }
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                const source = audioContext.createMediaStreamSource(localStream);
-                source.connect(analyser);
-                analyser.fftSize = 32;
-                dataArray = new Uint8Array(analyser.frequencyBinCount);
-                drawMicLevel();
-            } catch (err) {
-                console.error('Mic level setup error:', err);
-            }
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(localStream);
+            source.connect(analyser);
+            analyser.fftSize = 32;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            drawMicLevel();
         }
 
         function drawMicLevel() {
@@ -982,164 +929,124 @@
             }
         }
 
-        function simulateStranger() {
-            setTimeout(() => {
-                statusBar.innerHTML = '<span class="status-indicator"></span><span>Connected! (Demo)</span>';
-                addMessage('system', 'Connected to demo stranger.');
-                chatInput.disabled = false;
-                sendBtn.disabled = false;
-                reportBtn.style.display = 'block';
-                remoteContainer.classList.add('camera-on');
-                remoteStatus.classList.add('active');
-                
-                const canvas = document.createElement('canvas');
-                canvas.width = 640;
-                canvas.height = 480;
-                const ctx = canvas.getContext('2d');
-                const gradient = ctx.createLinearGradient(0, 0, 640, 480);
-                gradient.addColorStop(0, '#667eea');
-                gradient.addColorStop(1, '#764ba2');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, 640, 480);
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 30px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('DEMO STRANGER', 320, 220);
-                ctx.font = '16px Arial';
-                ctx.fillText('(Simulated)', 320, 260);
-                
-                const stream = canvas.captureStream(30);
-                remoteVideo.srcObject = stream;
-                
-                demoInterval = setInterval(() => {
-                    if (Math.random() > 0.7) {
-                        const randomMsg = demoMessages[Math.floor(Math.random() * demoMessages.length)];
-                        addMessage('stranger', randomMsg);
-                    }
-                }, 5000);
-            }, 2000);
+        // --- REAL CONNECTION LOGIC ---
+        function initConnection() {
+            statusBar.innerHTML = '<span class="status-indicator"></span><span>Connecting...</span>';
+            
+            // Bypass Localtunnel 'Click to Continue' for WebSockets
+            ws = new WebSocket(TUNNEL_URL.replace('https', 'wss'));
+
+            ws.onopen = () => {
+                ws.send(JSON.stringify({ type: 'find' }));
+            };
+
+            ws.onmessage = async (e) => {
+                const data = JSON.parse(e.data);
+
+                // Update Online Count in Header
+                if (data.type === 'online_count') {
+                    statusBar.innerHTML = `<span class="status-indicator"></span><span>Online: ${data.count} users</span>`;
+                    return;
+                }
+
+                if (data.type === 'match') {
+                    addMessage('system', 'Stranger matched! Say hi.');
+                    chatInput.disabled = false;
+                    sendBtn.disabled = false;
+                    reportBtn.style.display = 'block';
+                    initRTC(data.init, data.pid);
+                }
+
+                if (data.type === 'signal') handleSignal(data);
+                if (data.type === 'message') addMessage('stranger', data.text);
+                if (data.type === 'dis') handleDisconnect();
+            };
+
+            ws.onerror = () => {
+                statusBar.innerHTML = '<span class="status-indicator" style="background:red"></span><span>Server Offline</span>';
+            };
         }
 
+        async function initRTC(isInitiator, pid) {
+            peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.ontrack = e => {
+                remoteVideo.srcObject = e.streams[0];
+                remoteContainer.classList.add('camera-on');
+                remoteStatus.classList.add('active');
+            };
+
+            peerConnection.onicecandidate = e => {
+                if (e.candidate) ws.send(JSON.stringify({ type: 'signal', pid, candidate: e.candidate }));
+            };
+
+            if (isInitiator) {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
+            }
+        }
+
+        async function handleSignal(data) {
+            if (data.sdp) {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                if (data.sdp.type === 'offer') {
+                    const ans = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(ans);
+                    ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: ans }));
+                }
+            } else if (data.candidate) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
+        }
+
+        function handleDisconnect() {
+            addMessage('system', 'Stranger disconnected.');
+            if (peerConnection) peerConnection.close();
+            remoteVideo.srcObject = null;
+            remoteContainer.classList.remove('camera-on');
+            remoteStatus.classList.remove('active');
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+            reportBtn.style.display = 'none';
+        }
+
+        // --- BUTTONS ---
         startButton.addEventListener('click', async () => {
-            selectedRegion = regionSelect.value;
-            isDemoMode = demoMode.checked;
-            
             landingPage.style.display = 'none';
             chatPage.style.display = 'block';
-            
-            currentRegion.innerHTML = regionSelect.innerHTML;
-            currentRegion.value = selectedRegion;
-            currentRegion.disabled = false;
-            
-            statusBar.innerHTML = '<span class="status-indicator"></span><span>Starting...</span>';
-            
             await getDevices();
             await startLocalStream();
-            
-            if (isDemoMode) {
-                statusBar.innerHTML = '<span class="status-indicator"></span><span>Looking...</span>';
-                addMessage('system', 'Welcome! Demo mode enabled.');
-                simulateStranger();
-            } else {
-                statusBar.innerHTML = '<span class="status-indicator"></span><span>Ready! Connect server.</span>';
-                addMessage('system', 'Welcome! Connect WebSocket server.');
-            }
-        });
-
-        cameraSelect.addEventListener('change', async () => {
-            addMessage('system', 'Switching camera...');
-            await startLocalStream();
-            addMessage('system', 'Camera switched!');
-        });
-
-        micSelect.addEventListener('change', async () => {
-            addMessage('system', 'Switching microphone...');
-            await startLocalStream();
-            addMessage('system', 'Microphone switched!');
-        });
-
-        currentRegion.addEventListener('change', () => {
-            selectedRegion = currentRegion.value;
-            const regionText = currentRegion.options[currentRegion.selectedIndex].text;
-            addMessage('system', `Region: ${regionText}`);
-            statusBar.innerHTML = `<span class="status-indicator"></span><span>${regionText}</span>`;
+            initConnection();
         });
 
         sendBtn.addEventListener('click', () => {
             const text = chatInput.value.trim();
-            if (text) {
+            if (text && ws) {
+                ws.send(JSON.stringify({ type: 'message', text }));
                 addMessage('you', text);
                 chatInput.value = '';
-                
-                if (isDemoMode && Math.random() > 0.5) {
-                    setTimeout(() => {
-                        const responses = [
-                            "That's interesting!",
-                            "Cool!",
-                            "I see",
-                            "Haha nice",
-                            "Tell me more",
-                            "Really?",
-                            "Awesome!"
-                        ];
-                        addMessage('stranger', responses[Math.floor(Math.random() * responses.length)]);
-                    }, 1000 + Math.random() * 2000);
-                }
-            }
-        });
-
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !chatInput.disabled) {
-                sendBtn.click();
             }
         });
 
         nextBtn.addEventListener('click', () => {
-            if (demoInterval) clearInterval(demoInterval);
-            chatMessages.innerHTML = '';
+            if (peerConnection) peerConnection.close();
             remoteVideo.srcObject = null;
             remoteContainer.classList.remove('camera-on');
-            remoteStatus.classList.remove('active');
-            reportBtn.style.display = 'none';
-            chatInput.disabled = true;
-            sendBtn.disabled = true;
-            
-            statusBar.innerHTML = '<span class="status-indicator"></span><span>Looking...</span>';
-            addMessage('system', 'Searching for next stranger...');
-            
-            if (isDemoMode) {
-                simulateStranger();
-            }
+            chatMessages.innerHTML = '';
+            ws.send(JSON.stringify({ type: 'find' }));
+            addMessage('system', 'Finding new stranger...');
         });
 
-        stopBtn.addEventListener('click', () => {
-            if (localStream) {
-                localStream.getTracks().forEach(t => t.stop());
-            }
-            if (audioContext) {
-                audioContext.close();
-            }
-            if (demoInterval) clearInterval(demoInterval);
-            location.reload();
-        });
+        stopBtn.addEventListener('click', () => location.reload());
 
-        reportBtn.addEventListener('click', () => {
-            reportModal.classList.add('show');
-        });
-
-        cancelReport.addEventListener('click', () => {
-            reportModal.classList.remove('show');
-        });
-
+        reportBtn.addEventListener('click', () => reportModal.classList.add('show'));
+        cancelReport.addEventListener('click', () => reportModal.classList.remove('show'));
         confirmReport.addEventListener('click', () => {
             reportModal.classList.remove('show');
-            addMessage('system', 'User reported. Thanks!');
-        });
-
-        reportModal.addEventListener('click', (e) => {
-            if (e.target === reportModal) {
-                reportModal.classList.remove('show');
-            }
+            addMessage('system', 'Reported. Searching for someone else...');
+            nextBtn.click();
         });
     </script>
 </body>
