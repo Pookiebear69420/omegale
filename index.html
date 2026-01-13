@@ -829,7 +829,8 @@
 
 <script>
         // --- CONFIG ---
-        const TUNNEL_URL = 'https://wild-chefs-tan.loca.lt'; // Ensure this matches your tunnel link
+        // Ensure this is updated EVERY time you restart your tunnel
+        const TUNNEL_URL = 'https://legal-mammals-laugh.loca.lt'; 
         
         const landingPage = document.getElementById('landingPage');
         const chatPage = document.getElementById('chatPage');
@@ -861,7 +862,6 @@
         let localStream = null;
         let peerConnection = null;
         let audioContext, analyser, dataArray;
-        let partnerID = 'partner';
 
         // --- THEME LOGIC ---
         themeOptions.forEach(option => {
@@ -882,13 +882,10 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // --- DEVICE LOGIC ---
         async function getDevices() {
             const devices = await navigator.mediaDevices.enumerateDevices();
-            const cameras = devices.filter(d => d.kind === 'videoinput');
-            const mics = devices.filter(d => d.kind === 'audioinput');
-            cameraSelect.innerHTML = cameras.map((c, i) => `<option value="${c.deviceId}">${c.label || `Camera ${i + 1}`}</option>`).join('');
-            micSelect.innerHTML = mics.map((m, i) => `<option value="${m.deviceId}">${m.label || `Mic ${i + 1}`}</option>`).join('');
+            cameraSelect.innerHTML = devices.filter(d => d.kind === 'videoinput').map((c, i) => `<option value="${c.deviceId}">${c.label || `Camera ${i + 1}`}</option>`).join('');
+            micSelect.innerHTML = devices.filter(d => d.kind === 'audioinput').map((m, i) => `<option value="${m.deviceId}">${m.label || `Mic ${i + 1}`}</option>`).join('');
         }
 
         async function startLocalStream() {
@@ -903,8 +900,8 @@
                 localStatus.classList.add('active');
                 setupMicLevel();
             } catch (err) {
-                localContainer.classList.remove('camera-on');
-                addMessage('system', 'Camera/Mic access denied.');
+                console.error("Camera error:", err);
+                addMessage('system', 'Camera access denied.');
             }
         }
 
@@ -929,31 +926,34 @@
             }
         }
 
-        // --- REAL CONNECTION LOGIC ---
+        // --- CONNECTION LOGIC ---
         function initConnection() {
-            statusBar.innerHTML = '<span class="status-indicator"></span><span>Connecting...</span>';
+            statusBar.innerHTML = '<span class="status-indicator"></span><span>Connecting to Laptop...</span>';
             
-            // Bypass Localtunnel 'Click to Continue' for WebSockets
-            ws = new WebSocket(TUNNEL_URL.replace('https', 'wss'));
+            // Convert https:// to wss://
+            const wsUrl = TUNNEL_URL.replace('https', 'wss');
+            console.log("Attempting connection to:", wsUrl);
+
+            ws = new WebSocket(wsUrl);
 
             ws.onopen = () => {
+                console.log("Connected to Server!");
                 ws.send(JSON.stringify({ type: 'find' }));
             };
 
             ws.onmessage = async (e) => {
                 const data = JSON.parse(e.data);
 
-                // Update Online Count in Header
                 if (data.type === 'online_count') {
-                    statusBar.innerHTML = `<span class="status-indicator"></span><span>Online: ${data.count} users</span>`;
-                    return;
+                    // Update status without wiping out the indicator
+                    statusBar.innerHTML = `<span class="status-indicator active"></span><span>Online: ${data.count} users</span>`;
                 }
 
                 if (data.type === 'match') {
-                    addMessage('system', 'Stranger matched! Say hi.');
+                    statusBar.innerHTML = `<span class="status-indicator active" style="background:#4CAF50"></span><span>Connected!</span>`;
+                    addMessage('system', 'Stranger matched.');
                     chatInput.disabled = false;
                     sendBtn.disabled = false;
-                    reportBtn.style.display = 'block';
                     initRTC(data.init, data.pid);
                 }
 
@@ -962,85 +962,49 @@
                 if (data.type === 'dis') handleDisconnect();
             };
 
-            ws.onerror = () => {
-                statusBar.innerHTML = '<span class="status-indicator" style="background:red"></span><span>Server Offline</span>';
+            ws.onerror = (err) => {
+                console.error("WebSocket Error:", err);
+                statusBar.innerHTML = '<span class="status-indicator" style="background:red"></span><span>Server Offline (Check Tunnel)</span>';
             };
         }
 
-async function initRTC(isInitiator, pid) {
-    // Added STUN servers to help bypass firewalls
-    const configuration = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' }
-        ]
-    };
-
-    peerConnection = new RTCPeerConnection(configuration);
-    
-    // Attach your camera/mic to the connection
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-    peerConnection.ontrack = e => {
-        console.log("Receiving remote stream...");
-        remoteVideo.srcObject = e.streams[0];
-        remoteContainer.classList.add('camera-on');
-        remoteStatus.classList.add('active');
-    };
-
-    peerConnection.onicecandidate = e => {
-        if (e.candidate) {
-            ws.send(JSON.stringify({ type: 'signal', pid, candidate: e.candidate }));
-        }
-    };
-
-    if (isInitiator) {
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
-    }
-}
-async function handleSignal(data) {
-    if (data.sdp) {
-        // If peerConnection doesn't exist yet (for the person receiving the offer)
-        if (!peerConnection) {
-            const configuration = {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' }
-                ]
-            };
-            peerConnection = new RTCPeerConnection(configuration);
-
-            // Attach local camera/mic
+        async function initRTC(isInitiator, pid) {
+            const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+            peerConnection = new RTCPeerConnection(config);
+            
             localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
-            // Set up the remote video display
             peerConnection.ontrack = e => {
                 remoteVideo.srcObject = e.streams[0];
                 remoteContainer.classList.add('camera-on');
                 remoteStatus.classList.add('active');
             };
 
-            // Set up ICE candidate forwarding
             peerConnection.onicecandidate = e => {
-                if (e.candidate) ws.send(JSON.stringify({ type: 'signal', pid: 'partner', candidate: e.candidate }));
+                if (e.candidate) ws.send(JSON.stringify({ type: 'signal', pid, candidate: e.candidate }));
             };
+
+            if (isInitiator) {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
+            }
         }
 
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-        
-        if (data.sdp.type === 'offer') {
-            const ans = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(ans);
-            ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: ans }));
+        async function handleSignal(data) {
+            if (data.sdp) {
+                if (!peerConnection) await initRTC(false, 'partner');
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                if (data.sdp.type === 'offer') {
+                    const ans = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(ans);
+                    ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: ans }));
+                }
+            } else if (data.candidate && peerConnection) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
         }
-    } else if (data.candidate && peerConnection) {
-        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-    }
-}
+
         function handleDisconnect() {
             addMessage('system', 'Stranger disconnected.');
             if (peerConnection) peerConnection.close();
@@ -1049,7 +1013,6 @@ async function handleSignal(data) {
             remoteStatus.classList.remove('active');
             chatInput.disabled = true;
             sendBtn.disabled = true;
-            reportBtn.style.display = 'none';
         }
 
         // --- BUTTONS ---
@@ -1080,14 +1043,6 @@ async function handleSignal(data) {
         });
 
         stopBtn.addEventListener('click', () => location.reload());
-
-        reportBtn.addEventListener('click', () => reportModal.classList.add('show'));
-        cancelReport.addEventListener('click', () => reportModal.classList.remove('show'));
-        confirmReport.addEventListener('click', () => {
-            reportModal.classList.remove('show');
-            addMessage('system', 'Reported. Searching for someone else...');
-            nextBtn.click();
-        });
     </script>
 </body>
 </html>
