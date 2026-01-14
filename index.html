@@ -6,7 +6,7 @@
     <title>Omegale - Talk to Strangers</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+       
         :root {
             --primary: #ff6b35;
             --primary-dark: #ff8c42;
@@ -21,36 +21,31 @@
             --text: #fff;
             --text-muted: #aaa;
         }
-
         [data-theme="blue"] {
             --primary: #3498db;
             --primary-dark: #5dade2;
             --secondary: #2ecc71;
             --secondary-dark: #27ae60;
         }
-
         [data-theme="purple"] {
             --primary: #9b59b6;
             --primary-dark: #bb8fce;
             --secondary: #8e44ad;
             --secondary-dark: #7d3c98;
         }
-
         [data-theme="green"] {
             --primary: #27ae60;
             --primary-dark: #2ecc71;
             --secondary: #16a085;
             --secondary-dark: #1abc9c;
         }
-
-        body { 
+        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, var(--bg-main) 0%, var(--bg-secondary) 100%);
             color: var(--text);
             overflow: hidden;
         }
-
-        .landing-page { 
+        .landing-page {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -58,8 +53,7 @@
             min-height: 100vh;
             padding: 12px;
         }
-
-        .logo { 
+        .logo {
             font-size: 48px;
             font-weight: bold;
             background: linear-gradient(45deg, var(--primary), var(--primary-dark));
@@ -70,20 +64,17 @@
             letter-spacing: 1px;
             animation: logoGlow 3s ease-in-out infinite;
         }
-
         @keyframes logoGlow {
             0%, 100% { filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.5)); }
             50% { filter: drop-shadow(0 0 30px rgba(255, 107, 53, 0.8)); }
         }
-
         .tagline {
             font-size: 12px;
             color: var(--text-muted);
             margin-bottom: 20px;
             font-weight: 300;
         }
-
-        .rules { 
+        .rules {
             max-width: 450px;
             text-align: center;
             margin-bottom: 20px;
@@ -92,20 +83,17 @@
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .rules-text { 
+        .rules-text {
             color: #ff6b6b;
             font-size: 11px;
             line-height: 1.5;
             margin-bottom: 12px;
         }
-
         .region-select-container {
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-
         .region-select-container label {
             display: block;
             color: var(--text-muted);
@@ -113,7 +101,6 @@
             margin-bottom: 6px;
             font-weight: 500;
         }
-
         .region-select-container select {
             width: 100%;
             max-width: 240px;
@@ -126,12 +113,10 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-
         .region-select-container select:hover {
             border-color: var(--primary);
             background: #333;
         }
-
         .demo-toggle {
             margin-top: 10px;
             display: flex;
@@ -139,21 +124,18 @@
             justify-content: center;
             gap: 6px;
         }
-
         .demo-toggle label {
             color: var(--text-muted);
             cursor: pointer;
             user-select: none;
             font-size: 10px;
         }
-
         .demo-toggle input[type="checkbox"] {
             width: 14px;
             height: 14px;
             cursor: pointer;
         }
-
-        .start-button { 
+        .start-button {
             background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
             color: white;
             border: none;
@@ -167,19 +149,16 @@
             text-transform: uppercase;
             letter-spacing: 0.8px;
         }
-
-        .start-button:hover { 
+        .start-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(76, 175, 80, 0.6);
         }
-
-        .chat-page { 
+        .chat-page {
             display: none;
             height: 100vh;
             background: var(--bg-secondary);
         }
-
-        .status-bar { 
+        .status-bar {
             background: linear-gradient(135deg, var(--bg-card), #1f1f1f);
             padding: 6px 12px;
             text-align: center;
@@ -192,7 +171,6 @@
             justify-content: center;
             gap: 6px;
         }
-
         .status-indicator {
             width: 6px;
             height: 6px;
@@ -200,25 +178,21 @@
             background: var(--secondary);
             animation: pulse 2s infinite;
         }
-
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(1.2); }
         }
-
-        .chat-container { 
+        .chat-container {
             display: flex;
             height: calc(100vh - 28px);
         }
-
-        .video-section { 
+        .video-section {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #000;
         }
-
-        .videos { 
+        .videos {
             flex: 1;
             display: flex;
             gap: 8px;
@@ -227,8 +201,7 @@
             align-items: center;
             background: #000;
         }
-
-        .video-container { 
+        .video-container {
             flex: 0 1 48%;
             aspect-ratio: 4 / 3;
             position: relative;
@@ -239,20 +212,17 @@
             transition: all 0.3s ease;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
         }
-
-        .video-container.camera-on { 
+        .video-container.camera-on {
             border: 2px solid #ff4444;
             box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
         }
-
-        video { 
+        video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             background: #000;
         }
-
-        .video-label { 
+        .video-label {
             position: absolute;
             top: 6px;
             left: 6px;
@@ -266,7 +236,6 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
         .connection-status {
             position: absolute;
             bottom: 6px;
@@ -282,10 +251,8 @@
             border: 1px solid rgba(76, 175, 80, 0.3);
             display: none;
         }
-
         .connection-status.active { display: block; }
-
-        .report-btn { 
+        .report-btn {
             position: absolute;
             top: 6px;
             right: 6px;
@@ -301,13 +268,11 @@
             transition: all 0.3s;
             backdrop-filter: blur(10px);
         }
-
         .report-btn:hover {
             background: rgba(220, 53, 69, 0.8);
             transform: scale(1.05);
         }
-
-        .controls-bottom { 
+        .controls-bottom {
             background: linear-gradient(135deg, var(--bg-main), var(--bg-secondary));
             padding: 15px;
             display: flex;
@@ -315,8 +280,7 @@
             justify-content: center;
             border-top: 1px solid var(--border);
         }
-
-        .control-btn { 
+        .control-btn {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
@@ -330,50 +294,41 @@
             letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
         }
-
         .control-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
         }
-
         .control-btn.stop {
             background: linear-gradient(135deg, var(--danger), #c0392b);
             box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
         }
-
         .control-btn.stop:hover {
             box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
         }
-
-        .sidebar { 
+        .sidebar {
             width: 260px;
             background: linear-gradient(135deg, var(--bg-main), var(--bg-secondary));
             display: flex;
             flex-direction: column;
             border-left: 1px solid var(--border);
         }
-
-        .settings-section { 
+        .settings-section {
             padding: 10px;
             border-bottom: 1px solid var(--border);
             max-height: 45vh;
             overflow-y: auto;
         }
-
         .settings-section::-webkit-scrollbar {
             width: 4px;
         }
-
         .settings-section::-webkit-scrollbar-track {
             background: var(--bg-secondary);
         }
-
         .settings-section::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 2px;
         }
-
-        .settings-section h3 { 
+        .settings-section h3 {
             color: var(--primary);
             margin-bottom: 8px;
             font-size: 11px;
@@ -381,20 +336,17 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
-        .setting-item { 
+        .setting-item {
             margin-bottom: 8px;
         }
-
-        .setting-item label { 
+        .setting-item label {
             display: block;
             margin-bottom: 4px;
             font-size: 9px;
             color: var(--text-muted);
             font-weight: 500;
         }
-
-        .setting-item select { 
+        .setting-item select {
             width: 100%;
             padding: 6px 8px;
             background: var(--bg-card);
@@ -405,25 +357,21 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-
         .setting-item select:hover {
             border-color: var(--primary);
             background: #333;
         }
-
         .setting-item select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
         }
-
         .theme-selector {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 4px;
             margin-top: 4px;
         }
-
         .theme-option {
             width: 100%;
             aspect-ratio: 1;
@@ -432,36 +380,28 @@
             border: 2px solid transparent;
             transition: all 0.3s;
         }
-
         .theme-option:hover {
             transform: scale(1.05);
         }
-
         .theme-option.active {
             border-color: #fff;
             box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
         }
-
         .theme-option[data-theme="orange"] {
             background: linear-gradient(135deg, #ff6b35, #ff8c42);
         }
-
         .theme-option[data-theme="blue"] {
             background: linear-gradient(135deg, #3498db, #5dade2);
         }
-
         .theme-option[data-theme="purple"] {
             background: linear-gradient(135deg, #9b59b6, #bb8fce);
         }
-
         .theme-option[data-theme="green"] {
             background: linear-gradient(135deg, #27ae60, #2ecc71);
         }
-
         .mic-indicator {
             margin-top: 8px;
         }
-
         .mic-label {
             display: block;
             margin-bottom: 4px;
@@ -469,8 +409,7 @@
             color: var(--text-muted);
             font-weight: 500;
         }
-
-        .mic-bars { 
+        .mic-bars {
             display: flex;
             align-items: flex-end;
             gap: 2px;
@@ -480,24 +419,21 @@
             border-radius: 4px;
             border: 1px solid var(--border);
         }
-
-        .mic-bar { 
+        .mic-bar {
             flex: 1;
             background: linear-gradient(180deg, var(--secondary), var(--secondary-dark));
             border-radius: 2px;
             transition: height 0.1s;
             min-height: 2px;
         }
-
-        .chat-section { 
+        .chat-section {
             flex: 1;
             display: flex;
             flex-direction: column;
             padding: 10px;
             min-height: 0;
         }
-
-        .chat-messages { 
+        .chat-messages {
             flex: 1;
             overflow-y: auto;
             margin-bottom: 8px;
@@ -506,56 +442,46 @@
             border-radius: 6px;
             border: 1px solid var(--border);
         }
-
         .chat-messages::-webkit-scrollbar {
             width: 4px;
         }
-
         .chat-messages::-webkit-scrollbar-track {
             background: var(--bg-main);
             border-radius: 6px;
         }
-
         .chat-messages::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 6px;
         }
-
-        .message { 
+        .message {
             margin-bottom: 6px;
             font-size: 10px;
             line-height: 1.3;
             padding: 4px 0;
             animation: messageSlide 0.3s ease;
         }
-
         @keyframes messageSlide {
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        .message.stranger { 
+        .message.stranger {
             color: var(--accent);
             font-weight: 500;
         }
-
-        .message.you { 
+        .message.you {
             color: var(--secondary);
             font-weight: 500;
         }
-
-        .message.system { 
+        .message.system {
             color: #95a5a6;
             font-style: italic;
             font-size: 9px;
         }
-
-        .chat-input-area { 
+        .chat-input-area {
             display: flex;
             gap: 6px;
         }
-
-        .chat-input { 
+        .chat-input {
             flex: 1;
             padding: 8px 10px;
             background: var(--bg-card);
@@ -565,19 +491,16 @@
             font-size: 10px;
             transition: all 0.3s;
         }
-
         .chat-input:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
         }
-
         .chat-input:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
-        .send-btn { 
+        .send-btn {
             background: linear-gradient(135deg, var(--accent), #2980b9);
             color: white;
             border: none;
@@ -590,18 +513,15 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .send-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 3px 12px rgba(52, 152, 219, 0.5);
         }
-
         .send-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
-        .report-modal { 
+        .report-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -614,10 +534,8 @@
             justify-content: center;
             backdrop-filter: blur(5px);
         }
-
         .report-modal.show { display: flex; }
-
-        .report-content { 
+        .report-content {
             background: var(--bg-card);
             padding: 20px;
             border-radius: 10px;
@@ -627,31 +545,26 @@
             box-shadow: 0 6px 30px rgba(0, 0, 0, 0.5);
             animation: modalSlide 0.3s ease;
         }
-
         @keyframes modalSlide {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
         }
-
         .report-content h2 {
             color: var(--primary);
             margin-bottom: 10px;
             font-size: 16px;
         }
-
         .report-content p {
             color: #ccc;
             margin-bottom: 15px;
             line-height: 1.4;
             font-size: 11px;
         }
-
-        .report-buttons { 
+        .report-buttons {
             display: flex;
             gap: 8px;
         }
-
-        .report-buttons button { 
+        .report-buttons button {
             flex: 1;
             padding: 8px;
             border: none;
@@ -662,26 +575,23 @@
             transition: all 0.3s;
             text-transform: uppercase;
         }
-
         .report-buttons button:hover {
             transform: translateY(-2px);
         }
-
         @media (max-width: 1024px) {
             .sidebar { width: 240px; }
             .logo { font-size: 40px; }
         }
-
         @media (max-width: 768px) {
             .chat-container { flex-direction: column; }
-            .sidebar { 
+            .sidebar {
                 width: 100%;
                 border-left: none;
                 border-top: 1px solid var(--border);
                 max-height: 40vh;
             }
             .videos { flex-direction: column; gap: 8px; padding: 8px; }
-            .video-container { 
+            .video-container {
                 flex: 1 1 auto;
                 width: 100%;
                 max-width: 100%;
@@ -691,7 +601,6 @@
             .logo { font-size: 36px; }
             .control-btn { padding: 14px 50px; font-size: 16px; }
         }
-
         @media (max-width: 480px) {
             .logo { font-size: 32px; }
             .start-button { padding: 10px 35px; font-size: 14px; }
@@ -737,7 +646,6 @@
         </div>
         <button class="start-button" id="startButton">Start</button>
     </div>
-
     <div class="chat-page" id="chatPage">
         <div class="status-bar" id="statusBar">
             <span class="status-indicator"></span>
@@ -763,11 +671,10 @@
                     <button class="control-btn stop" id="stopBtn">⏹ Stop</button>
                 </div>
             </div>
-
             <div class="sidebar">
                 <div class="settings-section">
                     <h3>Settings</h3>
-                    
+                   
                     <div class="setting-item">
                         <label for="themeSelect">Theme</label>
                         <div class="theme-selector">
@@ -777,24 +684,23 @@
                             <div class="theme-option" data-theme="green" title="Green"></div>
                         </div>
                     </div>
-
                     <div class="setting-item">
                         <label for="cameraSelect">Camera</label>
                         <select id="cameraSelect"><option>Loading...</option></select>
                     </div>
-                    
+                   
                     <div class="setting-item">
                         <label for="micSelect">Microphone</label>
                         <select id="micSelect"><option>Loading...</option></select>
                     </div>
-                    
+                   
                     <div class="setting-item">
                         <label for="currentRegion">Region</label>
                         <select id="currentRegion">
                             <option>Loading...</option>
                         </select>
                     </div>
-                    
+                   
                     <div class="mic-indicator">
                         <span class="mic-label">Mic Level</span>
                         <div class="mic-bars" id="micBars">
@@ -804,7 +710,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="chat-section">
                     <div class="chat-messages" id="chatMessages"></div>
                     <div class="chat-input-area">
@@ -815,7 +720,6 @@
             </div>
         </div>
     </div>
-
     <div class="report-modal" id="reportModal">
         <div class="report-content">
             <h2>Report User</h2>
@@ -826,404 +730,237 @@
             </div>
         </div>
     </div>
-
-<script>
-    // 1. CONFIG: Paste your localtunnel link here!
-    const TUNNEL_URL = 'https://twenty-ads-sing.loca.lt'
-
-    // DOM Elements
-    const landingPage = document.getElementById('landingPage');
-    const chatPage = document.getElementById('chatPage');
-    const startButton = document.getElementById('startButton');
-    const statusBar = document.getElementById('statusBar');
-    const chatMessages = document.getElementById('chatMessages');
-    const chatInput = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const localVideo = document.getElementById('localVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
-    const localContainer = document.getElementById('localContainer');
-    const remoteContainer = document.getElementById('remoteContainer');
-    const localStatus = document.getElementById('localStatus');
-    const remoteStatus = document.getElementById('remoteStatus');
-    const cameraSelect = document.getElementById('cameraSelect');
-    const micSelect = document.getElementById('micSelect');
-    const regionSelect = document.getElementById('regionSelect');
-    const currentRegion = document.getElementById('currentRegion');
-    const demoMode = document.getElementById('demoMode');
-    const reportBtn = document.getElementById('reportBtn');
-    const micBars = document.getElementById('micBars').children;
-
-    let ws = null;
-    let localStream = null;
-    let peerConnection = null;
-    let audioContext, analyser, dataArray;
-    let isDemoMode = false;
-
-    // WebRTC STUN Servers (Helps find the path between two computers)
-    const rtcConfig = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-    };
-
-    // --- UI & THEME LOGIC ---
-    document.querySelectorAll('.theme-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
-            opt.classList.add('active');
-            document.documentElement.setAttribute('data-theme', opt.dataset.theme);
+    <script>
+        // CONFIG: Paste your localtunnel link here!
+        const TUNNEL_URL = 'https://YOUR-SUBDOMAIN-HERE.loca.lt';
+        // DOM Elements
+        const landingPage = document.getElementById('landingPage');
+        const chatPage = document.getElementById('chatPage');
+        const startButton = document.getElementById('startButton');
+        const statusBar = document.getElementById('statusBar');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const localContainer = document.getElementById('localContainer');
+        const remoteContainer = document.getElementById('remoteContainer');
+        const localStatus = document.getElementById('localStatus');
+        const remoteStatus = document.getElementById('remoteStatus');
+        const cameraSelect = document.getElementById('cameraSelect');
+        const micSelect = document.getElementById('micSelect');
+        const regionSelect = document.getElementById('regionSelect');
+        const currentRegion = document.getElementById('currentRegion');
+        const demoMode = document.getElementById('demoMode');
+        const reportBtn = document.getElementById('reportBtn');
+        const reportModal = document.getElementById('reportModal');
+        const cancelReport = document.getElementById('cancelReport');
+        const confirmReport = document.getElementById('confirmReport');
+        const micBars = document.getElementById('micBars').children;
+        let ws = null;
+        let localStream = null;
+        let peerConnection = null;
+        let audioContext = null;
+        let analyser = null;
+        let isDemoMode = false;
+        // WebRTC STUN Servers (Helps find the path between two computers)
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
+            ],
+            iceCandidatePoolSize: 10
+        };
+        // --- UI & THEME LOGIC ---
+        document.querySelectorAll('.theme-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                document.documentElement.setAttribute('data-theme', opt.dataset.theme);
+            });
         });
-    });
-
-    function addMessage(type, text) {
-        const div = document.createElement('div');
-        div.className = `message ${type}`;
-        const prefix = type === 'you' ? 'You: ' : type === 'stranger' ? 'Stranger: ' : '';
-        div.textContent = prefix + text;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    // --- HARDWARE LOGIC (Camera/Mic) ---
-    async function getDevices() {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        cameraSelect.innerHTML = devices.filter(d => d.kind === 'videoinput').map(d => `<option value="${d.deviceId}">${d.label || 'Camera'}</option>`).join('');
-        micSelect.innerHTML = devices.filter(d => d.kind === 'audioinput').map(d => `<option value="${d.deviceId}">${d.label || 'Mic'}</option>`).join('');
-        
-        // Populate Sidebar Region dropdown
-        currentRegion.innerHTML = regionSelect.innerHTML;
-        currentRegion.value = regionSelect.value;
-    }
-
-    async function startLocalStream() {
-        if (localStream) localStream.getTracks().forEach(t => t.stop());
-        
-        const constraints = {
-            video: { deviceId: cameraSelect.value ? { exact: cameraSelect.value } : undefined },
-            audio: { deviceId: micSelect.value ? { exact: micSelect.value } : undefined }
-        };
-
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        localVideo.srcObject = localStream;
-        localContainer.classList.add('camera-on');
-        
-        // Setup Mic Bars
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-        audioContext.createMediaStreamSource(localStream).connect(analyser);
-        drawMicLevel();
-    }
-
-    function drawMicLevel() {
-        if (!analyser) return;
-        requestAnimationFrame(drawMicLevel);
-        const data = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(data);
-        const avg = data.reduce((a, b) => a + b) / data.length;
-        for (let i = 0; i < micBars.length; i++) {
-            micBars[i].style.height = Math.max(2, (avg / 128) * 30) + 'px';
+        function updateStatus(text) {
+            const onlineCount = Math.floor(Math.random() * (150000 - 140000) + 140000);
+            statusBar.innerHTML = `<span class="status-indicator"></span><span>${text}</span> <span style="float:right; opacity:0.7;">${onlineCount.toLocaleString()} users online</span>`;
         }
-    }
-
-    // --- CONNECTION LOGIC ---
-    function initConnection() {
-        if (isDemoMode) {
-            statusBar.innerHTML = '● Demo Mode Active';
-            return;
+        function addMessage(type, text) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            const prefix = type === 'you' ? 'You: ' : type === 'stranger' ? 'Stranger: ' : '';
+            div.textContent = prefix + text;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-
-        statusBar.innerHTML = 'Connecting to Laptop...';
-        const wsUrl = TUNNEL_URL.replace('https', 'wss');
-        ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-            statusBar.innerHTML = '● Online & Searching';
-            ws.send(JSON.stringify({ type: 'find' }));
-        };
-
-        ws.onmessage = async (e) => {
-            const data = JSON.parse(e.data);
-            if (data.type === 'match') {
-                addMessage('system', 'Partner matched!');
-                chatInput.disabled = false;
-                sendBtn.disabled = false;
-                initRTC(data.init, data.pid);
+        // --- HARDWARE LOGIC (Camera/Mic) ---
+        async function startLocalStream() {
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            const constraints = {
+                video: cameraSelect.value ? { deviceId: { exact: cameraSelect.value } } : true,
+                audio: micSelect.value ? { deviceId: { exact: micSelect.value } } : true
+            };
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                localVideo.srcObject = localStream;
+                localContainer.classList.add('camera-on');
+                localStatus.classList.add('active');
+                // Setup Mic Bars
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(localStream);
+                source.connect(analyser);
+                drawMicLevel();
+            } catch (e) {
+                console.error("Media error:", e);
+                addMessage('system', 'Error accessing camera/microphone. Please check permissions.');
             }
-            if (data.type === 'signal') handleSignal(data);
-            if (data.type === 'message') addMessage('stranger', data.text);
-            if (data.type === 'dis') handleDisconnect();
-        };
-
-        ws.onerror = () => statusBar.innerHTML = 'Server Offline (Check Tunnel URL)';
-    }
-
-    async function initRTC(isInitiator, pid) {
-        if (peerConnection) peerConnection.close();
-        peerConnection = new RTCPeerConnection(rtcConfig);
-        
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-        
-        peerConnection.ontrack = (e) => {
-            remoteVideo.srcObject = e.streams[0];
-            remoteContainer.classList.add('camera-on');
-            remoteStatus.classList.add('active');
-        };
-
-        peerConnection.onicecandidate = (e) => {
-            if (e.candidate) ws.send(JSON.stringify({ type: 'signal', pid, candidate: e.candidate }));
-        };
-
-        if (isInitiator) {
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-            ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
         }
-    }
-
-    async function handleSignal(data) {
-        if (data.sdp) {
-            if (!peerConnection) await initRTC(false, 'partner');
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-            if (data.sdp.type === 'offer') {
-                const ans = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(ans);
-                ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: ans }));
+        function drawMicLevel() {
+            if (!analyser) return;
+            requestAnimationFrame(drawMicLevel);
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(data);
+            const avg = data.reduce((a, b) => a + b) / data.length;
+            for (let i = 0; i < micBars.length; i++) {
+                const height = Math.max(2, (avg / 128) * 30 * (i + 1) / micBars.length);
+                micBars[i].style.height = height + 'px';
             }
-        } else if (data.candidate && peerConnection) {
-            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
         }
-    }
-
-    function handleDisconnect() {
-        addMessage('system', 'Stranger left.');
-        if (peerConnection) peerConnection.close();
-        peerConnection = null;
-        remoteVideo.srcObject = null;
-        remoteContainer.classList.remove('camera-on');
-        remoteStatus.classList.remove('active');
-        chatInput.disabled = true;
-        sendBtn.disabled = true;
-    }
-
-    // --- BUTTON CLICKS ---
-    startButton.addEventListener('click', async () => {
-        isDemoMode = demoMode.checked;
-        landingPage.style.display = 'none';
-        chatPage.style.display = 'block';
-        await getDevices();
-        await startLocalStream();
-        initConnection();
-    });
-
-    sendBtn.addEventListener('click', () => {
-        const text = chatInput.value.trim();
-        if (text && ws) {
-            ws.send(JSON.stringify({ type: 'message', text }));
-            addMessage('you', text);
-            chatInput.value = '';
-        }
-    });
-
-    nextBtn.addEventListener('click', () => {
-        handleDisconnect();
-        chatMessages.innerHTML = '';
-        if (ws) ws.send(JSON.stringify({ type: 'find' }));
-        addMessage('system', 'Searching...');
-    });
-
-    stopBtn.addEventListener('click', () => location.reload());
-
-    // Switch Camera/Mic instantly
-    cameraSelect.addEventListener('change', startLocalStream);
-    micSelect.addEventListener('change', startLocalStream);
-<script>
-    // 1. CONFIG: Paste your localtunnel link here!
-    const TUNNEL_URL = 'https://YOUR-SUBDOMAIN-HERE.loca.lt'; 
-
-    const landingPage = document.getElementById('landingPage');
-    const chatPage = document.getElementById('chatPage');
-    const startButton = document.getElementById('startButton');
-    const statusBar = document.getElementById('statusBar');
-    const chatMessages = document.getElementById('chatMessages');
-    const chatInput = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const localVideo = document.getElementById('localVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
-    const localContainer = document.getElementById('localContainer');
-    const remoteContainer = document.getElementById('remoteContainer');
-    const localStatus = document.getElementById('localStatus');
-    const remoteStatus = document.getElementById('remoteStatus');
-    const cameraSelect = document.getElementById('cameraSelect');
-    const micSelect = document.getElementById('micSelect');
-    const regionSelect = document.getElementById('regionSelect');
-    const currentRegion = document.getElementById('currentRegion');
-    const demoMode = document.getElementById('demoMode');
-
-    let ws = null;
-    let localStream = null;
-    let peerConnection = null;
-    let isDemoMode = false;
-
-    // ADDED: Better ICE Servers to punch through firewalls
-    const rtcConfig = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' }
-        ],
-        iceCandidatePoolSize: 10
-    };
-
-    function updateStatus(text) {
-        const onlineCount = Math.floor(Math.random() * (150000 - 140000) + 140000);
-        statusBar.innerHTML = `<span class="status-indicator"></span><span>${text}</span> <span style="float:right; opacity:0.7;">${onlineCount.toLocaleString()} users online</span>`;
-    }
-
-    function addMessage(type, text) {
-        const div = document.createElement('div');
-        div.className = `message ${type}`;
-        div.textContent = (type === 'you' ? 'You: ' : type === 'stranger' ? 'Stranger: ' : '') + text;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    async function startLocalStream() {
-        if (localStream) localStream.getTracks().forEach(t => t.stop());
-        const constraints = {
-            video: cameraSelect.value ? { deviceId: { exact: cameraSelect.value } } : true,
-            audio: micSelect.value ? { deviceId: { exact: micSelect.value } } : true
-        };
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia(constraints);
-            localVideo.srcObject = localStream;
-            localContainer.classList.add('camera-on');
-        } catch (e) {
-            console.error("Camera error:", e);
-        }
-    }
-
-    function connect() {
-        if (isDemoMode) { updateStatus('Demo Mode Active'); return; }
-        const wsUrl = TUNNEL_URL.replace('https', 'wss');
-        ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-            updateStatus('Looking for someone...');
-            ws.send(JSON.stringify({ type: 'find' }));
-        };
-
-        ws.onmessage = async (e) => {
-            const data = JSON.parse(e.data);
-            if (data.type === 'match') {
-                updateStatus('Partner Found!');
-                chatInput.disabled = false;
-                sendBtn.disabled = false;
-                setupRTC(data.init, data.pid);
+        // --- CONNECTION LOGIC ---
+        function connect() {
+            if (isDemoMode) {
+                updateStatus('Demo Mode Active');
+                return;
             }
-            if (data.type === 'signal') {
-                if (data.sdp) {
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-                    if (data.sdp.type === 'offer') {
-                        const answer = await peerConnection.createAnswer();
-                        await peerConnection.setLocalDescription(answer);
-                        ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: answer }));
+            updateStatus('Connecting to server...');
+            const wsUrl = TUNNEL_URL.replace('https', 'wss');
+            ws = new WebSocket(wsUrl);
+            ws.onopen = () => {
+                updateStatus('Looking for someone...');
+                ws.send(JSON.stringify({ type: 'find', region: regionSelect.value }));
+            };
+            ws.onmessage = async (e) => {
+                const data = JSON.parse(e.data);
+                if (data.type === 'match') {
+                    addMessage('system', 'Partner matched!');
+                    updateStatus('Partner Found!');
+                    chatInput.disabled = false;
+                    sendBtn.disabled = false;
+                    reportBtn.style.display = 'block';
+                    await setupRTC(data.init, data.pid);
+                } else if (data.type === 'signal') {
+                    if (data.sdp) {
+                        if (!peerConnection) await setupRTC(false, 'partner');
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                        if (data.sdp.type === 'offer') {
+                            const answer = await peerConnection.createAnswer();
+                            await peerConnection.setLocalDescription(answer);
+                            ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: answer }));
+                        }
+                    } else if (data.candidate) {
+                        try {
+                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        } catch (e) {
+                            console.error('ICE candidate error:', e);
+                        }
                     }
-                } else if (data.candidate) {
-                    try { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e){}
+                } else if (data.type === 'message') {
+                    addMessage('stranger', data.text);
+                } else if (data.type === 'dis') {
+                    addMessage('system', 'Stranger left.');
+                    cleanUpRTC();
                 }
-            }
-            if (data.type === 'message') addMessage('stranger', data.text);
-            if (data.type === 'dis') cleanUpRTC();
-        };
-    }
-
-    async function setupRTC(isInitiator, pid) {
-        if (peerConnection) peerConnection.close();
-        peerConnection = new RTCPeerConnection(rtcConfig);
-
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-        peerConnection.ontrack = (event) => {
-            // FIX: Assign stream to remote video immediately
-            if (remoteVideo.srcObject !== event.streams[0]) {
-                remoteVideo.srcObject = event.streams[0];
-                remoteContainer.classList.add('camera-on');
-                remoteStatus.classList.add('active');
-            }
-        };
-
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                ws.send(JSON.stringify({ type: 'signal', pid, candidate: event.candidate }));
-            }
-        };
-
-        // Handle connection state changes (Debug/Fix black screen)
-        peerConnection.onconnectionstatechange = () => {
-            if (peerConnection.connectionState === 'connected') {
-                updateStatus('Connected!');
-            }
-        };
-
-        if (isInitiator) {
-            const offer = await peerConnection.createOffer({ offerToReceiveVideo: true, offerToReceiveAudio: true });
-            await peerConnection.setLocalDescription(offer);
-            ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
+            };
+            ws.onerror = () => updateStatus('Server Offline (Check Tunnel URL)');
+            ws.onclose = () => updateStatus('Disconnected. Refresh to reconnect.');
         }
-    }
-
-    function cleanUpRTC() {
-        if (peerConnection) peerConnection.close();
-        peerConnection = null;
-        remoteVideo.srcObject = null;
-        remoteContainer.classList.remove('camera-on');
-        remoteStatus.classList.remove('active');
-        chatInput.disabled = true;
-        sendBtn.disabled = true;
-    }
-
-    startButton.addEventListener('click', async () => {
-        isDemoMode = demoMode.checked;
-        landingPage.style.display = 'none';
-        chatPage.style.display = 'block';
-        
-        // Populate Regions instantly
-        currentRegion.innerHTML = regionSelect.innerHTML;
-        currentRegion.value = regionSelect.value;
-        
-        await navigator.mediaDevices.enumerateDevices().then(devices => {
-            cameraSelect.innerHTML = devices.filter(d => d.kind === 'videoinput').map(d => `<option value="${d.deviceId}">${d.label || 'Camera'}</option>`).join('');
-            micSelect.innerHTML = devices.filter(d => d.kind === 'audioinput').map(d => `<option value="${d.deviceId}">${d.label || 'Mic'}</option>`).join('');
+        async function setupRTC(isInitiator, pid) {
+            if (peerConnection) peerConnection.close();
+            peerConnection = new RTCPeerConnection(rtcConfig);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            peerConnection.ontrack = (event) => {
+                if (remoteVideo.srcObject !== event.streams[0]) {
+                    remoteVideo.srcObject = event.streams[0];
+                    remoteContainer.classList.add('camera-on');
+                    remoteStatus.classList.add('active');
+                }
+            };
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    ws.send(JSON.stringify({ type: 'signal', pid, candidate: event.candidate }));
+                }
+            };
+            peerConnection.onconnectionstatechange = () => {
+                if (peerConnection.connectionState === 'connected') {
+                    updateStatus('Connected!');
+                } else if (peerConnection.connectionState === 'disconnected') {
+                    addMessage('system', 'Connection lost.');
+                    cleanUpRTC();
+                }
+            };
+            if (isInitiator) {
+                const offer = await peerConnection.createOffer({ offerToReceiveVideo: true, offerToReceiveAudio: true });
+                await peerConnection.setLocalDescription(offer);
+                ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
+            }
+        }
+        function cleanUpRTC() {
+            if (peerConnection) peerConnection.close();
+            peerConnection = null;
+            remoteVideo.srcObject = null;
+            remoteContainer.classList.remove('camera-on');
+            remoteStatus.classList.remove('active');
+            reportBtn.style.display = 'none';
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+            updateStatus('Looking for someone...');
+        }
+        // --- BUTTON CLICKS & EVENTS ---
+        startButton.addEventListener('click', async () => {
+            isDemoMode = demoMode.checked;
+            landingPage.style.display = 'none';
+            chatPage.style.display = 'block';
+            currentRegion.innerHTML = regionSelect.innerHTML;
+            currentRegion.value = regionSelect.value;
+            await startLocalStream();
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            cameraSelect.innerHTML = devices.filter(d => d.kind === 'videoinput').map(d => `<option value="${d.deviceId}">${d.label || 'Camera'}</option>`).join('') || '<option>No cameras found</option>';
+            micSelect.innerHTML = devices.filter(d => d.kind === 'audioinput').map(d => `<option value="${d.deviceId}">${d.label || 'Mic'}</option>`).join('') || '<option>No mics found</option>';
+            connect();
         });
-
-        await startLocalStream();
-        connect();
-    });
-
-    nextBtn.addEventListener('click', () => {
-        cleanUpRTC();
-        chatMessages.innerHTML = '';
-        if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'find' }));
-        updateStatus('Searching...');
-    });
-
-    sendBtn.addEventListener('click', () => {
-        const text = chatInput.value.trim();
-        if (text && ws) {
-            ws.send(JSON.stringify({ type: 'message', text }));
-            addMessage('you', text);
-            chatInput.value = '';
-        }
-    });
-
-    cameraSelect.addEventListener('change', startLocalStream);
-    micSelect.addEventListener('change', startLocalStream);
-    stopBtn.addEventListener('click', () => location.reload());
-</script>
+        sendBtn.addEventListener('click', () => {
+            const text = chatInput.value.trim();
+            if (text && ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'message', text }));
+                addMessage('you', text);
+                chatInput.value = '';
+            }
+        });
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendBtn.click();
+        });
+        nextBtn.addEventListener('click', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'dis' }));
+            cleanUpRTC();
+            chatMessages.innerHTML = '';
+            if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'find', region: currentRegion.value }));
+            addMessage('system', 'Searching...');
+        });
+        stopBtn.addEventListener('click', () => location.reload());
+        cameraSelect.addEventListener('change', startLocalStream);
+        micSelect.addEventListener('change', startLocalStream);
+        // Report Logic
+        reportBtn.addEventListener('click', () => reportModal.classList.add('show'));
+        cancelReport.addEventListener('click', () => reportModal.classList.remove('show'));
+        confirmReport.addEventListener('click', () => {
+            reportModal.classList.remove('show');
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'report' }));
+                addMessage('system', 'User reported.');
+            }
+        });
+    </script>
 </body>
 </html>
