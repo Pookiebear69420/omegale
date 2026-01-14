@@ -770,7 +770,17 @@
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' }
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:stun.stunprotocol.org:3478' },
+                { urls: 'stun:stun.sipnet.net:3478' },
+                // Add TURN if you have credentials, e.g.:
+                // {
+                //     urls: 'turn:your.turn.server:3478',
+                //     username: 'user',
+                //     credential: 'pass'
+                // }
             ],
             iceCandidatePoolSize: 10
         };
@@ -795,26 +805,54 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         // --- HARDWARE LOGIC (Camera/Mic) ---
+        async function updateDevices() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(d => d.kind === 'videoinput');
+            const audioDevices = devices.filter(d => d.kind === 'audioinput');
+            cameraSelect.innerHTML = videoDevices.map(d => `<option value="${d.deviceId}">${d.label || 'Camera ' + (videoDevices.indexOf(d) + 1)}</option>`).join('') || '<option value="">No camera available</option>';
+            micSelect.innerHTML = audioDevices.map(d => `<option value="${d.deviceId}">${d.label || 'Mic ' + (audioDevices.indexOf(d) + 1)}</option>`).join('') || '<option value="">No mic available</option>';
+            if (videoDevices.length === 0) {
+                addMessage('system', 'No camera devices detected. Video will not be available.');
+            }
+            if (audioDevices.length === 0) {
+                addMessage('system', 'No microphone devices detected. Audio will not be available.');
+            }
+        }
         async function startLocalStream() {
-            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+            }
             const constraints = {
-                video: cameraSelect.value ? { deviceId: { exact: cameraSelect.value } } : true,
-                audio: micSelect.value ? { deviceId: { exact: micSelect.value } } : true
+                video: cameraSelect.value ? { deviceId: { exact: cameraSelect.value } } : false,
+                audio: micSelect.value ? { deviceId: { exact: micSelect.value } } : false
             };
             try {
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
                 localVideo.srcObject = localStream;
                 localContainer.classList.add('camera-on');
                 localStatus.classList.add('active');
-                // Setup Mic Bars
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                const source = audioContext.createMediaStreamSource(localStream);
-                source.connect(analyser);
-                drawMicLevel();
+                // Setup Mic Bars if audio available
+                if (localStream.getAudioTracks().length > 0) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    const source = audioContext.createMediaStreamSource(localStream);
+                    source.connect(analyser);
+                    drawMicLevel();
+                } else {
+                    addMessage('system', 'No audio track available.');
+                }
+                if (localStream.getVideoTracks().length === 0) {
+                    addMessage('system', 'No video track available.');
+                }
             } catch (e) {
                 console.error("Media error:", e);
-                addMessage('system', 'Error accessing camera/microphone. Please check permissions.');
+                if (e.name === 'NotAllowedError') {
+                    addMessage('system', 'Camera/microphone access denied. Please grant permissions in your browser settings.');
+                } else if (e.name === 'NotFoundError') {
+                    addMessage('system', 'No camera/microphone found. Please check your devices.');
+                } else {
+                    addMessage('system', `Error accessing camera/microphone: ${e.message}. Please check permissions and devices.`);
+                }
             }
         }
         function drawMicLevel() {
@@ -853,11 +891,16 @@
                 } else if (data.type === 'signal') {
                     if (data.sdp) {
                         if (!peerConnection) await setupRTC(false, 'partner');
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-                        if (data.sdp.type === 'offer') {
-                            const answer = await peerConnection.createAnswer();
-                            await peerConnection.setLocalDescription(answer);
-                            ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: answer }));
+                        try {
+                            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                            if (data.sdp.type === 'offer') {
+                                const answer = await peerConnection.createAnswer();
+                                await peerConnection.setLocalDescription(answer);
+                                ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: answer }));
+                            }
+                        } catch (err) {
+                            console.error('SDP error:', err);
+                            addMessage('system', 'Error setting SDP. Connection may fail.');
                         }
                     } else if (data.candidate) {
                         try {
@@ -873,18 +916,29 @@
                     cleanUpRTC();
                 }
             };
-            ws.onerror = () => updateStatus('Server Offline (Check Tunnel URL)');
+            ws.onerror = (err) => {
+                console.error('WebSocket error:', err);
+                updateStatus('Server Offline (Check Tunnel URL)');
+            };
             ws.onclose = () => updateStatus('Disconnected. Refresh to reconnect.');
         }
         async function setupRTC(isInitiator, pid) {
             if (peerConnection) peerConnection.close();
             peerConnection = new RTCPeerConnection(rtcConfig);
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            if (localStream) {
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            }
             peerConnection.ontrack = (event) => {
                 if (remoteVideo.srcObject !== event.streams[0]) {
                     remoteVideo.srcObject = event.streams[0];
                     remoteContainer.classList.add('camera-on');
                     remoteStatus.classList.add('active');
+                    if (event.streams[0].getVideoTracks().length === 0) {
+                        addMessage('system', 'No video from stranger.');
+                    }
+                    if (event.streams[0].getAudioTracks().length === 0) {
+                        addMessage('system', 'No audio from stranger.');
+                    }
                 }
             };
             peerConnection.onicecandidate = (event) => {
@@ -893,15 +947,22 @@
                 }
             };
             peerConnection.onconnectionstatechange = () => {
+                console.log('Connection state:', peerConnection.connectionState);
                 if (peerConnection.connectionState === 'connected') {
                     updateStatus('Connected!');
-                } else if (peerConnection.connectionState === 'disconnected') {
-                    addMessage('system', 'Connection lost.');
+                } else if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
+                    addMessage('system', 'Connection lost or failed. Trying to reconnect...');
                     cleanUpRTC();
                 }
             };
+            peerConnection.oniceconnectionstatechange = () => {
+                console.log('ICE state:', peerConnection.iceConnectionState);
+                if (peerConnection.iceConnectionState === 'failed') {
+                    addMessage('system', 'ICE connection failed. May need TURN server or check network.');
+                }
+            };
             if (isInitiator) {
-                const offer = await peerConnection.createOffer({ offerToReceiveVideo: true, offerToReceiveAudio: true });
+                const offer = await peerConnection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
                 await peerConnection.setLocalDescription(offer);
                 ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
             }
@@ -924,10 +985,9 @@
             chatPage.style.display = 'block';
             currentRegion.innerHTML = regionSelect.innerHTML;
             currentRegion.value = regionSelect.value;
+            await updateDevices();
             await startLocalStream();
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            cameraSelect.innerHTML = devices.filter(d => d.kind === 'videoinput').map(d => `<option value="${d.deviceId}">${d.label || 'Camera'}</option>`).join('') || '<option>No cameras found</option>';
-            micSelect.innerHTML = devices.filter(d => d.kind === 'audioinput').map(d => `<option value="${d.deviceId}">${d.label || 'Mic'}</option>`).join('') || '<option>No mics found</option>';
+            navigator.mediaDevices.ondevicechange = updateDevices;
             connect();
         });
         sendBtn.addEventListener('click', () => {
@@ -951,6 +1011,12 @@
         stopBtn.addEventListener('click', () => location.reload());
         cameraSelect.addEventListener('change', startLocalStream);
         micSelect.addEventListener('change', startLocalStream);
+        currentRegion.addEventListener('change', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'find', region: currentRegion.value }));
+                addMessage('system', 'Region changed. Searching again...');
+            }
+        });
         // Report Logic
         reportBtn.addEventListener('click', () => reportModal.classList.add('show'));
         cancelReport.addEventListener('click', () => reportModal.classList.remove('show'));
