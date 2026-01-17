@@ -244,6 +244,8 @@
                 this.connectionStatus = 'Idle';
                 this.peerConnection = null;
                 this.socket = null;
+                this.pendingAnswer = null; // Store answer if it arrives too early
+                this.pendingCandidates = []; // Store ICE candidates if they arrive too early
                 
                 this.render();
             }
@@ -320,12 +322,15 @@
 
             createPeer(isCaller) {
                 this.peerConnection = new RTCPeerConnection(rtcConfig);
+                this.pendingAnswer = null;
+                this.pendingCandidates = [];
 
                 this.localStream.getTracks().forEach(t =>
                     this.peerConnection.addTrack(t, this.localStream)
                 );
 
                 this.peerConnection.ontrack = e => {
+                    console.log('Remote track received:', e.streams[0]);
                     this.remoteStream = e.streams[0];
                     this.gameState = 'connected';
                     this.connectionStatus = 'Connected';
@@ -343,6 +348,7 @@
 
                 this.peerConnection.onconnectionstatechange = () => {
                     const state = this.peerConnection?.connectionState;
+                    console.log('Connection state changed to:', state);
                     if (state === 'connected') {
                         this.connectionStatus = 'Connected';
                         this.render();
@@ -352,15 +358,43 @@
                 };
 
                 if (isCaller) {
-                    this.peerConnection.createOffer().then(o => {
-                        this.peerConnection.setLocalDescription(o);
+                    this.peerConnection.createOffer().then(async o => {
+                        await this.peerConnection.setLocalDescription(o);
+                        console.log('Local offer set, signaling state:', this.peerConnection.signalingState);
+                        
+                        // Process pending answer if it arrived early
+                        if (this.pendingAnswer) {
+                            console.log('Processing pending answer');
+                            await this.peerConnection.setRemoteDescription(this.pendingAnswer);
+                            this.pendingAnswer = null;
+                            
+                            // Process any pending ICE candidates
+                            await this.processPendingCandidates();
+                        }
+                        
                         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                             this.socket.send(JSON.stringify({
                                 type: "signal",
                                 data: { offer: o }
                             }));
                         }
+                    }).catch(err => {
+                        console.error('Error creating offer:', err);
                     });
+                }
+            }
+
+            async processPendingCandidates() {
+                if (this.pendingCandidates.length > 0) {
+                    console.log('Processing', this.pendingCandidates.length, 'pending ICE candidates');
+                    for (const candidate of this.pendingCandidates) {
+                        try {
+                            await this.peerConnection.addIceCandidate(candidate);
+                        } catch (err) {
+                            console.error('Error adding pending candidate:', err);
+                        }
+                    }
+                    this.pendingCandidates = [];
                 }
             }
 
@@ -370,9 +404,14 @@
                 }
 
                 if (data.offer) {
+                    console.log('Received offer');
                     await this.peerConnection.setRemoteDescription(data.offer);
                     const answer = await this.peerConnection.createAnswer();
                     await this.peerConnection.setLocalDescription(answer);
+                    
+                    // Process any pending ICE candidates
+                    await this.processPendingCandidates();
+                    
                     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                         this.socket.send(JSON.stringify({
                             type: "signal",
@@ -382,11 +421,35 @@
                 }
 
                 if (data.answer) {
-                    await this.peerConnection.setRemoteDescription(data.answer);
+                    console.log('Received answer, current signaling state:', this.peerConnection.signalingState);
+                    
+                    if (this.peerConnection.signalingState === 'have-local-offer') {
+                        await this.peerConnection.setRemoteDescription(data.answer);
+                        console.log('Remote answer set successfully');
+                        
+                        // Process any pending ICE candidates
+                        await this.processPendingCandidates();
+                    } else {
+                        console.warn('Received answer too early, queuing for later. Current state:', this.peerConnection.signalingState);
+                        this.pendingAnswer = data.answer;
+                    }
                 }
 
                 if (data.candidate) {
-                    await this.peerConnection.addIceCandidate(data.candidate);
+                    console.log('Received ICE candidate');
+                    
+                    // Only add ICE candidates after remote description is set
+                    if (this.peerConnection.remoteDescription) {
+                        try {
+                            await this.peerConnection.addIceCandidate(data.candidate);
+                            console.log('ICE candidate added successfully');
+                        } catch (err) {
+                            console.error('Error adding ICE candidate:', err);
+                        }
+                    } else {
+                        console.log('Remote description not set yet, queuing ICE candidate');
+                        this.pendingCandidates.push(data.candidate);
+                    }
                 }
             }
 
@@ -444,6 +507,8 @@
                 this.messages = [];
                 this.remoteStream = null;
                 this.connectionStatus = 'Idle';
+                this.pendingAnswer = null;
+                this.pendingCandidates = [];
             }
 
             toggleMute() {
