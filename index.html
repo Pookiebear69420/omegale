@@ -3,1030 +3,551 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Omegale - Talk to Strangers</title>
+    <title>Omeagle - Talk to Strangers</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-       
-        :root {
-            --primary: #ff6b35;
-            --primary-dark: #ff8c42;
-            --secondary: #4CAF50;
-            --secondary-dark: #45a049;
-            --accent: #3498db;
-            --danger: #e74c3c;
-            --bg-main: #1a1a1a;
-            --bg-secondary: #0a0a0a;
-            --bg-card: #2a2a2a;
-            --border: #333;
-            --text: #fff;
-            --text-muted: #aaa;
-        }
-        [data-theme="blue"] {
-            --primary: #3498db;
-            --primary-dark: #5dade2;
-            --secondary: #2ecc71;
-            --secondary-dark: #27ae60;
-        }
-        [data-theme="purple"] {
-            --primary: #9b59b6;
-            --primary-dark: #bb8fce;
-            --secondary: #8e44ad;
-            --secondary-dark: #7d3c98;
-        }
-        [data-theme="green"] {
-            --primary: #27ae60;
-            --primary-dark: #2ecc71;
-            --secondary: #16a085;
-            --secondary-dark: #1abc9c;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--bg-main) 0%, var(--bg-secondary) 100%);
-            color: var(--text);
-            overflow: hidden;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
         }
-        .landing-page {
+        .omeagle-home {
+            min-height: 100vh;
+            background: #000;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 12px;
+            padding: 20px;
         }
-        .logo {
+        .omeagle-container {
+            max-width: 600px;
+            width: 100%;
+            background: #111;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(255,255,255,0.1);
+            padding: 40px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .omeagle-logo {
             font-size: 48px;
             font-weight: bold;
-            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-            animation: logoGlow 3s ease-in-out infinite;
-        }
-        @keyframes logoGlow {
-            0%, 100% { filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.5)); }
-            50% { filter: drop-shadow(0 0 30px rgba(255, 107, 53, 0.8)); }
-        }
-        .tagline {
-            font-size: 12px;
-            color: var(--text-muted);
+            color: #fff;
             margin-bottom: 20px;
-            font-weight: 300;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.1);
         }
-        .rules {
-            max-width: 450px;
-            text-align: center;
-            margin-bottom: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .omeagle-subtitle {
+            font-size: 18px;
+            color: #ccc;
+            margin-bottom: 30px;
         }
-        .rules-text {
-            color: #ff6b6b;
-            font-size: 11px;
-            line-height: 1.5;
-            margin-bottom: 12px;
-        }
-        .region-select-container {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .region-select-container label {
-            display: block;
-            color: var(--text-muted);
-            font-size: 10px;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-        .region-select-container select {
-            width: 100%;
-            max-width: 240px;
-            padding: 8px 10px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: 5px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .region-select-container select:hover {
-            border-color: var(--primary);
-            background: #333;
-        }
-        .demo-toggle {
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        .demo-toggle label {
-            color: var(--text-muted);
-            cursor: pointer;
-            user-select: none;
-            font-size: 10px;
-        }
-        .demo-toggle input[type="checkbox"] {
-            width: 14px;
-            height: 14px;
-            cursor: pointer;
-        }
-        .start-button {
-            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+        .omeagle-button {
+            background: #ff6b6b;
             color: white;
             border: none;
-            padding: 12px 45px;
-            font-size: 16px;
-            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 3px 15px rgba(76, 175, 80, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
+            transition: background 0.3s;
         }
-        .start-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.6);
+        .omeagle-button:hover {
+            background: #ff5252;
         }
-        .chat-page {
-            display: none;
+        .omeagle-select {
+            background: #222;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
+            border-radius: 5px;
+        }
+        .omeagle-chat {
             height: 100vh;
-            background: var(--bg-secondary);
-        }
-        .status-bar {
-            background: linear-gradient(135deg, var(--bg-card), #1f1f1f);
-            padding: 6px 12px;
-            text-align: center;
-            color: #ccc;
-            font-size: 11px;
-            border-bottom: 1px solid var(--border);
-            font-weight: 500;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
         }
-        .status-indicator {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--secondary);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-        }
-        .chat-container {
-            display: flex;
-            height: calc(100vh - 28px);
-        }
-        .video-section {
+        .omeagle-video-section {
             flex: 1;
-            display: flex;
-            flex-direction: column;
             background: #000;
-        }
-        .videos {
-            flex: 1;
-            display: flex;
-            gap: 8px;
-            padding: 8px;
-            justify-content: center;
-            align-items: center;
-            background: #000;
-        }
-        .video-container {
-            flex: 0 1 48%;
-            aspect-ratio: 4 / 3;
             position: relative;
-            background: #050505;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px solid #1a1a1a;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
         }
-        .video-container.camera-on {
-            border: 2px solid #ff4444;
-            box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
-        }
-        video {
+        .omeagle-remote-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             background: #000;
         }
-        .video-label {
+        .omeagle-local-video {
             position: absolute;
-            top: 6px;
-            left: 6px;
-            background: rgba(0, 0, 0, 0.85);
-            color: #fff;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 9px;
-            z-index: 10;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            object-fit: cover;
+            background: #222;
         }
-        .connection-status {
+        .omeagle-controls {
             position: absolute;
-            bottom: 6px;
-            right: 6px;
-            background: rgba(0, 0, 0, 0.85);
-            color: var(--secondary);
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 8px;
-            z-index: 10;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            display: none;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
         }
-        .connection-status.active { display: block; }
-        .report-btn {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            background: rgba(220, 53, 69, 0.5);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 9px;
-            cursor: pointer;
-            z-index: 10;
-            font-weight: 600;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-        .report-btn:hover {
-            background: rgba(220, 53, 69, 0.8);
-            transform: scale(1.05);
-        }
-        .controls-bottom {
-            background: linear-gradient(135deg, var(--bg-main), var(--bg-secondary));
+        .omeagle-control-btn {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: 1px solid #555;
             padding: 15px;
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            border-top: 1px solid var(--border);
-        }
-        .control-btn {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            padding: 16px 60px;
-            font-size: 18px;
-            border-radius: 50px;
+            border-radius: 50%;
             cursor: pointer;
-            font-weight: 700;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
-        }
-        .control-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
-        }
-        .control-btn.stop {
-            background: linear-gradient(135deg, var(--danger), #c0392b);
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-        }
-        .control-btn.stop:hover {
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
-        }
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(135deg, var(--bg-main), var(--bg-secondary));
+            transition: background 0.3s;
+            width: 50px;
+            height: 50px;
             display: flex;
-            flex-direction: column;
-            border-left: 1px solid var(--border);
-        }
-        .settings-section {
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-            max-height: 45vh;
-            overflow-y: auto;
-        }
-        .settings-section::-webkit-scrollbar {
-            width: 4px;
-        }
-        .settings-section::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-        .settings-section::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 2px;
-        }
-        .settings-section h3 {
-            color: var(--primary);
-            margin-bottom: 8px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .setting-item {
-            margin-bottom: 8px;
-        }
-        .setting-item label {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 9px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-        .setting-item select {
-            width: 100%;
-            padding: 6px 8px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: 4px;
-            font-size: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .setting-item select:hover {
-            border-color: var(--primary);
-            background: #333;
-        }
-        .setting-item select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
-        }
-        .theme-selector {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-            margin-top: 4px;
-        }
-        .theme-option {
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 4px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-        .theme-option:hover {
-            transform: scale(1.05);
-        }
-        .theme-option.active {
-            border-color: #fff;
-            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-        }
-        .theme-option[data-theme="orange"] {
-            background: linear-gradient(135deg, #ff6b35, #ff8c42);
-        }
-        .theme-option[data-theme="blue"] {
-            background: linear-gradient(135deg, #3498db, #5dade2);
-        }
-        .theme-option[data-theme="purple"] {
-            background: linear-gradient(135deg, #9b59b6, #bb8fce);
-        }
-        .theme-option[data-theme="green"] {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-        }
-        .mic-indicator {
-            margin-top: 8px;
-        }
-        .mic-label {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 9px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-        .mic-bars {
-            display: flex;
-            align-items: flex-end;
-            gap: 2px;
-            height: 30px;
-            background: var(--bg-secondary);
-            padding: 4px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-        }
-        .mic-bar {
-            flex: 1;
-            background: linear-gradient(180deg, var(--secondary), var(--secondary-dark));
-            border-radius: 2px;
-            transition: height 0.1s;
-            min-height: 2px;
-        }
-        .chat-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            min-height: 0;
-        }
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 8px;
-            padding: 8px;
-            background: var(--bg-secondary);
-            border-radius: 6px;
-            border: 1px solid var(--border);
-        }
-        .chat-messages::-webkit-scrollbar {
-            width: 4px;
-        }
-        .chat-messages::-webkit-scrollbar-track {
-            background: var(--bg-main);
-            border-radius: 6px;
-        }
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 6px;
-        }
-        .message {
-            margin-bottom: 6px;
-            font-size: 10px;
-            line-height: 1.3;
-            padding: 4px 0;
-            animation: messageSlide 0.3s ease;
-        }
-        @keyframes messageSlide {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .message.stranger {
-            color: var(--accent);
-            font-weight: 500;
-        }
-        .message.you {
-            color: var(--secondary);
-            font-weight: 500;
-        }
-        .message.system {
-            color: #95a5a6;
-            font-style: italic;
-            font-size: 9px;
-        }
-        .chat-input-area {
-            display: flex;
-            gap: 6px;
-        }
-        .chat-input {
-            flex: 1;
-            padding: 8px 10px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: 15px;
-            font-size: 10px;
-            transition: all 0.3s;
-        }
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
-        }
-        .chat-input:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .send-btn {
-            background: linear-gradient(135deg, var(--accent), #2980b9);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .send-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 3px 12px rgba(52, 152, 219, 0.5);
-        }
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .report-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(5px);
+            font-size: 20px;
         }
-        .report-modal.show { display: flex; }
-        .report-content {
-            background: var(--bg-card);
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 350px;
-            width: 90%;
-            border: 1px solid var(--border);
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.5);
-            animation: modalSlide 0.3s ease;
+        .omeagle-control-btn:hover {
+            background: rgba(255,255,255,0.2);
         }
-        @keyframes modalSlide {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .report-content h2 {
-            color: var(--primary);
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        .report-content p {
-            color: #ccc;
-            margin-bottom: 15px;
-            line-height: 1.4;
-            font-size: 11px;
-        }
-        .report-buttons {
+        .omeagle-chat-section {
+            width: 350px;
+            background: #111;
             display: flex;
-            gap: 8px;
+            flex-direction: column;
+            border-left: 1px solid #333;
         }
-        .report-buttons button {
+        .omeagle-messages {
             flex: 1;
-            padding: 8px;
+            padding: 20px;
+            overflow-y: auto;
+            background: #000;
+        }
+        .omeagle-message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .omeagle-message.me {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+        .omeagle-message.stranger {
+            background: #333;
+            color: #fff;
+        }
+        .omeagle-input-section {
+            padding: 20px;
+            border-top: 1px solid #333;
+            display: flex;
+            background: #111;
+        }
+        .omeagle-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background: #222;
+            color: #fff;
+        }
+        .omeagle-send-btn {
+            background: #28a745;
+            color: white;
             border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
             border-radius: 5px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 11px;
-            transition: all 0.3s;
-            text-transform: uppercase;
         }
-        .report-buttons button:hover {
-            transform: translateY(-2px);
+        .omeagle-send-btn:hover {
+            background: #218838;
         }
-        @media (max-width: 1024px) {
-            .sidebar { width: 240px; }
-            .logo { font-size: 40px; }
+        .omeagle-status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            border: 1px solid #555;
         }
-        @media (max-width: 768px) {
-            .chat-container { flex-direction: column; }
-            .sidebar {
-                width: 100%;
-                border-left: none;
-                border-top: 1px solid var(--border);
-                max-height: 40vh;
-            }
-            .videos { flex-direction: column; gap: 8px; padding: 8px; }
-            .video-container {
-                flex: 1 1 auto;
-                width: 100%;
-                max-width: 100%;
-                aspect-ratio: 16 / 9;
-            }
-            .settings-section { max-height: none; }
-            .logo { font-size: 36px; }
-            .control-btn { padding: 14px 50px; font-size: 16px; }
+        .omeagle-searching {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            flex-direction: column;
+            gap: 20px;
         }
-        @media (max-width: 480px) {
-            .logo { font-size: 32px; }
-            .start-button { padding: 10px 35px; font-size: 14px; }
-            .control-btn { padding: 12px 40px; font-size: 14px; }
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="landing-page" id="landingPage">
-        <div class="logo">Omegale</div>
-        <div class="tagline">Connect with strangers worldwide</div>
-        <div class="rules">
-            <div class="rules-text">
-                By pressing "Start", you agree to our rules. Rule violators will be banned.<br>
-                <strong>18+ only. No nudity. No harassment.</strong>
-            </div>
-            <div class="region-select-container">
-                <label for="regionSelect">Select Your Region</label>
-                <select id="regionSelect">
-                    <option value="any">🌍 Any Region (Global)</option>
-                    <option value="US">🇺🇸 United States</option>
-                    <option value="CA">🇨🇦 Canada</option>
-                    <option value="GB">🇬🇧 United Kingdom</option>
-                    <option value="AU">🇦🇺 Australia</option>
-                    <option value="DE">🇩🇪 Germany</option>
-                    <option value="FR">🇫🇷 France</option>
-                    <option value="ES">🇪🇸 Spain</option>
-                    <option value="IT">🇮🇹 Italy</option>
-                    <option value="NL">🇳🇱 Netherlands</option>
-                    <option value="SE">🇸🇪 Sweden</option>
-                    <option value="BR">🇧🇷 Brazil</option>
-                    <option value="MX">🇲🇽 Mexico</option>
-                    <option value="JP">🇯🇵 Japan</option>
-                    <option value="KR">🇰🇷 South Korea</option>
-                    <option value="CN">🇨🇳 China</option>
-                    <option value="IN">🇮🇳 India</option>
-                </select>
-                <div class="demo-toggle">
-                    <input type="checkbox" id="demoMode" checked>
-                    <label for="demoMode">Demo Mode (simulated stranger)</label>
-                </div>
-            </div>
-        </div>
-        <button class="start-button" id="startButton">Start</button>
-    </div>
-    <div class="chat-page" id="chatPage">
-        <div class="status-bar" id="statusBar">
-            <span class="status-indicator"></span>
-            <span>Connecting...</span>
-        </div>
-        <div class="chat-container">
-            <div class="video-section">
-                <div class="videos">
-                    <div class="video-container" id="localContainer">
-                        <video id="localVideo" autoplay muted playsinline></video>
-                        <div class="video-label">You</div>
-                        <div class="connection-status" id="localStatus">● Active</div>
-                    </div>
-                    <div class="video-container" id="remoteContainer">
-                        <video id="remoteVideo" autoplay playsinline></video>
-                        <div class="video-label">Stranger</div>
-                        <div class="connection-status" id="remoteStatus">● Active</div>
-                        <button class="report-btn" id="reportBtn" style="display: none;">⚠ Report</button>
-                    </div>
-                </div>
-                <div class="controls-bottom">
-                    <button class="control-btn" id="nextBtn">⏭ Next</button>
-                    <button class="control-btn stop" id="stopBtn">⏹ Stop</button>
-                </div>
-            </div>
-            <div class="sidebar">
-                <div class="settings-section">
-                    <h3>Settings</h3>
-                   
-                    <div class="setting-item">
-                        <label for="themeSelect">Theme</label>
-                        <div class="theme-selector">
-                            <div class="theme-option active" data-theme="orange" title="Orange"></div>
-                            <div class="theme-option" data-theme="blue" title="Blue"></div>
-                            <div class="theme-option" data-theme="purple" title="Purple"></div>
-                            <div class="theme-option" data-theme="green" title="Green"></div>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label for="cameraSelect">Camera</label>
-                        <select id="cameraSelect"><option>Loading...</option></select>
-                    </div>
-                   
-                    <div class="setting-item">
-                        <label for="micSelect">Microphone</label>
-                        <select id="micSelect"><option>Loading...</option></select>
-                    </div>
-                   
-                    <div class="setting-item">
-                        <label for="currentRegion">Region</label>
-                        <select id="currentRegion">
-                            <option>Loading...</option>
-                        </select>
-                    </div>
-                   
-                    <div class="mic-indicator">
-                        <span class="mic-label">Mic Level</span>
-                        <div class="mic-bars" id="micBars">
-                            <div class="mic-bar"></div><div class="mic-bar"></div><div class="mic-bar"></div>
-                            <div class="mic-bar"></div><div class="mic-bar"></div><div class="mic-bar"></div>
-                            <div class="mic-bar"></div><div class="mic-bar"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="chat-section">
-                    <div class="chat-messages" id="chatMessages"></div>
-                    <div class="chat-input-area">
-                        <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." disabled>
-                        <button class="send-btn" id="sendBtn" disabled>Send</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="report-modal" id="reportModal">
-        <div class="report-content">
-            <h2>Report User</h2>
-            <p>Report this user for violating guidelines? Multiple reports lead to a ban.</p>
-            <div class="report-buttons">
-                <button style="background: #555; color: white;" id="cancelReport">Cancel</button>
-                <button style="background: #e74c3c; color: white;" id="confirmReport">Report</button>
-            </div>
-        </div>
-    </div>
+    <div id="root"></div>
+
     <script>
-        // CONFIG: Paste your localtunnel link here!
-        const TUNNEL_URL = 'https://silent-donkeys-grin.loca.lt';
-        // DOM Elements
-        const landingPage = document.getElementById('landingPage');
-        const chatPage = document.getElementById('chatPage');
-        const startButton = document.getElementById('startButton');
-        const statusBar = document.getElementById('statusBar');
-        const chatMessages = document.getElementById('chatMessages');
-        const chatInput = document.getElementById('chatInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
-        const localContainer = document.getElementById('localContainer');
-        const remoteContainer = document.getElementById('remoteContainer');
-        const localStatus = document.getElementById('localStatus');
-        const remoteStatus = document.getElementById('remoteStatus');
-        const cameraSelect = document.getElementById('cameraSelect');
-        const micSelect = document.getElementById('micSelect');
-        const regionSelect = document.getElementById('regionSelect');
-        const currentRegion = document.getElementById('currentRegion');
-        const demoMode = document.getElementById('demoMode');
-        const reportBtn = document.getElementById('reportBtn');
-        const reportModal = document.getElementById('reportModal');
-        const cancelReport = document.getElementById('cancelReport');
-        const confirmReport = document.getElementById('confirmReport');
-        const micBars = document.getElementById('micBars').children;
-        let ws = null;
-        let localStream = null;
-        let peerConnection = null;
-        let audioContext = null;
-        let analyser = null;
-        let isDemoMode = false;
-        // WebRTC STUN Servers (Helps find the path between two computers)
+        const SOCKET_URL = "ws://localhost:8080"; // Change to wss://signal.yoursite.com in production
+        
+        const COUNTRIES = [
+            { code: 'INTL', name: 'International (Any)' },
+            { code: 'US', name: 'United States' },
+            { code: 'UK', name: 'United Kingdom' },
+            { code: 'CA', name: 'Canada' },
+            { code: 'AU', name: 'Australia' },
+            { code: 'IN', name: 'India' },
+            { code: 'BR', name: 'Brazil' },
+            { code: 'FR', name: 'France' },
+            { code: 'DE', name: 'Germany' },
+        ];
+
         const rtcConfig = {
             iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' },
-                { urls: 'stun:stun.stunprotocol.org:3478' },
-                { urls: 'stun:stun.sipnet.net:3478' },
-                // Add TURN if you have credentials, e.g.:
-                // {
-                //     urls: 'turn:your.turn.server:3478',
-                //     username: 'user',
-                //     credential: 'pass'
-                // }
-            ],
-            iceCandidatePoolSize: 10
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "stun:stun1.l.google.com:19302" }
+            ]
         };
-        // --- UI & THEME LOGIC ---
-        document.querySelectorAll('.theme-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
-                document.documentElement.setAttribute('data-theme', opt.dataset.theme);
-            });
-        });
-        function updateStatus(text) {
-            const onlineCount = Math.floor(Math.random() * (150000 - 140000) + 140000);
-            statusBar.innerHTML = `<span class="status-indicator"></span><span>${text}</span> <span style="float:right; opacity:0.7;">${onlineCount.toLocaleString()} users online</span>`;
-        }
-        function addMessage(type, text) {
-            const div = document.createElement('div');
-            div.className = `message ${type}`;
-            const prefix = type === 'you' ? 'You: ' : type === 'stranger' ? 'Stranger: ' : '';
-            div.textContent = prefix + text;
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        // --- HARDWARE LOGIC (Camera/Mic) ---
-        async function updateDevices() {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(d => d.kind === 'videoinput');
-            const audioDevices = devices.filter(d => d.kind === 'audioinput');
-            cameraSelect.innerHTML = videoDevices.map(d => `<option value="${d.deviceId}">${d.label || 'Camera ' + (videoDevices.indexOf(d) + 1)}</option>`).join('') || '<option value="">No camera available</option>';
-            micSelect.innerHTML = audioDevices.map(d => `<option value="${d.deviceId}">${d.label || 'Mic ' + (audioDevices.indexOf(d) + 1)}</option>`).join('') || '<option value="">No mic available</option>';
-            if (videoDevices.length === 0) {
-                addMessage('system', 'No camera devices detected. Video will not be available.');
+
+        class OmeagleApp {
+            constructor() {
+                this.gameState = 'home';
+                this.localStream = null;
+                this.remoteStream = null;
+                this.messages = [];
+                this.userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                this.isMuted = false;
+                this.selectedCountry = 'INTL';
+                this.connectionStatus = 'Idle';
+                this.peerConnection = null;
+                this.socket = null;
+                
+                this.render();
             }
-            if (audioDevices.length === 0) {
-                addMessage('system', 'No microphone devices detected. Audio will not be available.');
-            }
-        }
-        async function startLocalStream() {
-            if (localStream) {
-                localStream.getTracks().forEach(t => t.stop());
-            }
-            const constraints = {
-                video: cameraSelect.value ? { deviceId: { exact: cameraSelect.value } } : false,
-                audio: micSelect.value ? { deviceId: { exact: micSelect.value } } : false
-            };
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                localVideo.srcObject = localStream;
-                localContainer.classList.add('camera-on');
-                localStatus.classList.add('active');
-                // Setup Mic Bars if audio available
-                if (localStream.getAudioTracks().length > 0) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    analyser = audioContext.createAnalyser();
-                    const source = audioContext.createMediaStreamSource(localStream);
-                    source.connect(analyser);
-                    drawMicLevel();
-                } else {
-                    addMessage('system', 'No audio track available.');
-                }
-                if (localStream.getVideoTracks().length === 0) {
-                    addMessage('system', 'No video track available.');
-                }
-            } catch (e) {
-                console.error("Media error:", e);
-                if (e.name === 'NotAllowedError') {
-                    addMessage('system', 'Camera/microphone access denied. Please grant permissions in your browser settings.');
-                } else if (e.name === 'NotFoundError') {
-                    addMessage('system', 'No camera/microphone found. Please check your devices.');
-                } else {
-                    addMessage('system', `Error accessing camera/microphone: ${e.message}. Please check permissions and devices.`);
+
+            async startChat() {
+                try {
+                    this.localStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { width: 1280, height: 720 }, 
+                        audio: true 
+                    });
+                    this.gameState = 'searching';
+                    this.connectionStatus = 'Connecting to server...';
+                    this.render();
+                    
+                    this.connectWebSocket();
+                } catch (err) {
+                    console.error("Error accessing media devices:", err);
+                    alert("Please allow camera and microphone access to use this app.");
                 }
             }
-        }
-        function drawMicLevel() {
-            if (!analyser) return;
-            requestAnimationFrame(drawMicLevel);
-            const data = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(data);
-            const avg = data.reduce((a, b) => a + b) / data.length;
-            for (let i = 0; i < micBars.length; i++) {
-                const height = Math.max(2, (avg / 128) * 30 * (i + 1) / micBars.length);
-                micBars[i].style.height = height + 'px';
+
+            connectWebSocket() {
+                this.socket = new WebSocket(SOCKET_URL);
+
+                this.socket.onopen = () => {
+                    this.connectionStatus = 'Searching for a partner...';
+                    this.render();
+                    
+                    this.socket.send(JSON.stringify({
+                        type: "find",
+                        country: this.selectedCountry
+                    }));
+                };
+
+                this.socket.onmessage = async (event) => {
+                    const msg = JSON.parse(event.data);
+
+                    if (msg.type === "matched") {
+                        this.connectionStatus = 'Partner found! Connecting...';
+                        this.render();
+                        this.createPeer(true);
+                    }
+
+                    if (msg.type === "signal") {
+                        await this.handleSignal(msg.data);
+                    }
+
+                    if (msg.type === "chat") {
+                        this.messages.push({
+                            text: msg.text,
+                            senderId: msg.from
+                        });
+                        this.render();
+                    }
+
+                    if (msg.type === "disconnect") {
+                        this.handleRemoteDisconnect();
+                    }
+                };
+
+                this.socket.onerror = (error) => {
+                    console.error("WebSocket error:", error);
+                    this.connectionStatus = 'Connection error. Please try again.';
+                    this.render();
+                };
+
+                this.socket.onclose = () => {
+                    if (this.gameState !== 'home') {
+                        this.connectionStatus = 'Disconnected from server';
+                        this.render();
+                    }
+                };
             }
-        }
-        // --- CONNECTION LOGIC ---
-        function connect() {
-            if (isDemoMode) {
-                updateStatus('Demo Mode Active');
-                return;
-            }
-            updateStatus('Connecting to server...');
-            const wsUrl = TUNNEL_URL.replace('https', 'wss');
-            ws = new WebSocket(wsUrl);
-            ws.onopen = () => {
-                updateStatus('Looking for someone...');
-                ws.send(JSON.stringify({ type: 'find', region: regionSelect.value }));
-            };
-            ws.onmessage = async (e) => {
-                const data = JSON.parse(e.data);
-                if (data.type === 'match') {
-                    addMessage('system', 'Partner matched!');
-                    updateStatus('Partner Found!');
-                    chatInput.disabled = false;
-                    sendBtn.disabled = false;
-                    reportBtn.style.display = 'block';
-                    await setupRTC(data.init, data.pid);
-                } else if (data.type === 'signal') {
-                    if (data.sdp) {
-                        if (!peerConnection) await setupRTC(false, 'partner');
-                        try {
-                            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-                            if (data.sdp.type === 'offer') {
-                                const answer = await peerConnection.createAnswer();
-                                await peerConnection.setLocalDescription(answer);
-                                ws.send(JSON.stringify({ type: 'signal', pid: 'partner', sdp: answer }));
-                            }
-                        } catch (err) {
-                            console.error('SDP error:', err);
-                            addMessage('system', 'Error setting SDP. Connection may fail.');
+
+            createPeer(isCaller) {
+                this.peerConnection = new RTCPeerConnection(rtcConfig);
+
+                this.localStream.getTracks().forEach(t =>
+                    this.peerConnection.addTrack(t, this.localStream)
+                );
+
+                this.peerConnection.ontrack = e => {
+                    this.remoteStream = e.streams[0];
+                    this.gameState = 'connected';
+                    this.connectionStatus = 'Connected';
+                    this.render();
+                };
+
+                this.peerConnection.onicecandidate = e => {
+                    if (e.candidate && this.socket && this.socket.readyState === WebSocket.OPEN) {
+                        this.socket.send(JSON.stringify({
+                            type: "signal",
+                            data: { candidate: e.candidate }
+                        }));
+                    }
+                };
+
+                this.peerConnection.onconnectionstatechange = () => {
+                    const state = this.peerConnection?.connectionState;
+                    if (state === 'connected') {
+                        this.connectionStatus = 'Connected';
+                        this.render();
+                    } else if (state === 'disconnected' || state === 'failed') {
+                        this.handleRemoteDisconnect();
+                    }
+                };
+
+                if (isCaller) {
+                    this.peerConnection.createOffer().then(o => {
+                        this.peerConnection.setLocalDescription(o);
+                        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                            this.socket.send(JSON.stringify({
+                                type: "signal",
+                                data: { offer: o }
+                            }));
                         }
-                    } else if (data.candidate) {
-                        try {
-                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                        } catch (e) {
-                            console.error('ICE candidate error:', e);
-                        }
-                    }
-                } else if (data.type === 'message') {
-                    addMessage('stranger', data.text);
-                } else if (data.type === 'dis') {
-                    addMessage('system', 'Stranger left.');
-                    cleanUpRTC();
+                    });
                 }
-            };
-            ws.onerror = (err) => {
-                console.error('WebSocket error:', err);
-                updateStatus('Server Offline (Check Tunnel URL)');
-            };
-            ws.onclose = () => updateStatus('Disconnected. Refresh to reconnect.');
-        }
-        async function setupRTC(isInitiator, pid) {
-            if (peerConnection) peerConnection.close();
-            peerConnection = new RTCPeerConnection(rtcConfig);
-            if (localStream) {
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
             }
-            peerConnection.ontrack = (event) => {
-                if (remoteVideo.srcObject !== event.streams[0]) {
-                    remoteVideo.srcObject = event.streams[0];
-                    remoteContainer.classList.add('camera-on');
-                    remoteStatus.classList.add('active');
-                    if (event.streams[0].getVideoTracks().length === 0) {
-                        addMessage('system', 'No video from stranger.');
-                    }
-                    if (event.streams[0].getAudioTracks().length === 0) {
-                        addMessage('system', 'No audio from stranger.');
+
+            async handleSignal(data) {
+                if (!this.peerConnection) {
+                    this.createPeer(false);
+                }
+
+                if (data.offer) {
+                    await this.peerConnection.setRemoteDescription(data.offer);
+                    const answer = await this.peerConnection.createAnswer();
+                    await this.peerConnection.setLocalDescription(answer);
+                    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                        this.socket.send(JSON.stringify({
+                            type: "signal",
+                            data: { answer }
+                        }));
                     }
                 }
-            };
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    ws.send(JSON.stringify({ type: 'signal', pid, candidate: event.candidate }));
+
+                if (data.answer) {
+                    await this.peerConnection.setRemoteDescription(data.answer);
                 }
-            };
-            peerConnection.onconnectionstatechange = () => {
-                console.log('Connection state:', peerConnection.connectionState);
-                if (peerConnection.connectionState === 'connected') {
-                    updateStatus('Connected!');
-                } else if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
-                    addMessage('system', 'Connection lost or failed. Trying to reconnect...');
-                    cleanUpRTC();
+
+                if (data.candidate) {
+                    await this.peerConnection.addIceCandidate(data.candidate);
                 }
-            };
-            peerConnection.oniceconnectionstatechange = () => {
-                console.log('ICE state:', peerConnection.iceConnectionState);
-                if (peerConnection.iceConnectionState === 'failed') {
-                    addMessage('system', 'ICE connection failed. May need TURN server or check network.');
+            }
+
+            sendMessage(text) {
+                if (!text.trim()) return;
+
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: "chat",
+                        text
+                    }));
                 }
-            };
-            if (isInitiator) {
-                const offer = await peerConnection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
-                await peerConnection.setLocalDescription(offer);
-                ws.send(JSON.stringify({ type: 'signal', pid, sdp: offer }));
+            }
+
+            handleNext() {
+                this.cleanupConnection();
+                this.messages = [];
+                this.gameState = 'searching';
+                this.connectionStatus = 'Searching for next partner...';
+                this.render();
+                this.connectWebSocket();
+            }
+
+            handleStop() {
+                this.cleanupConnection();
+                this.gameState = 'home';
+                if (this.localStream) {
+                    this.localStream.getTracks().forEach(track => track.stop());
+                    this.localStream = null;
+                }
+                this.render();
+            }
+
+            handleRemoteDisconnect() {
+                this.connectionStatus = 'Partner disconnected';
+                this.remoteStream = null;
+                if (this.peerConnection) {
+                    this.peerConnection.close();
+                    this.peerConnection = null;
+                }
+                this.render();
+            }
+
+            cleanupConnection() {
+                if (this.socket) {
+                    this.socket.close();
+                    this.socket = null;
+                }
+
+                if (this.peerConnection) {
+                    this.peerConnection.close();
+                    this.peerConnection = null;
+                }
+
+                this.messages = [];
+                this.remoteStream = null;
+                this.connectionStatus = 'Idle';
+            }
+
+            toggleMute() {
+                if (this.localStream) {
+                    this.localStream.getAudioTracks().forEach(track => {
+                        track.enabled = !track.enabled;
+                    });
+                    this.isMuted = !this.isMuted;
+                    this.render();
+                }
+            }
+
+            render() {
+                const root = document.getElementById('root');
+                
+                if (this.gameState === 'home') {
+                    root.innerHTML = `
+                        <div class="omeagle-home">
+                            <div class="omeagle-container">
+                                <div class="omeagle-logo">Omeagle</div>
+                                <div class="omeagle-subtitle">Talk to strangers!</div>
+                                <select class="omeagle-select" id="countrySelect">
+                                    ${COUNTRIES.map(c => 
+                                        `<option value="${c.code}" ${c.code === this.selectedCountry ? 'selected' : ''}>${c.name}</option>`
+                                    ).join('')}
+                                </select>
+                                <button class="omeagle-button" id="startBtn">Start Video Chat</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('startBtn').onclick = () => this.startChat();
+                    document.getElementById('countrySelect').onchange = (e) => {
+                        this.selectedCountry = e.target.value;
+                    };
+                } else {
+                    root.innerHTML = `
+                        <div class="omeagle-chat">
+                            <div class="omeagle-video-section">
+                                <div class="omeagle-status">${this.connectionStatus}</div>
+                                ${this.remoteStream ? 
+                                    '<video id="remoteVideo" autoplay playsinline class="omeagle-remote-video"></video>' :
+                                    '<div class="omeagle-searching"><div class="spinner"></div><div>Searching for a partner...</div></div>'
+                                }
+                                <video id="localVideo" autoplay muted playsinline class="omeagle-local-video"></video>
+                                <div class="omeagle-controls">
+                                    <button class="omeagle-control-btn" id="muteBtn">${this.isMuted ? '🕪×' : '🎤︎︎'}</button>
+                                    <button class="omeagle-control-btn" id="nextBtn">⏭</button>
+                                    <button class="omeagle-control-btn" id="stopBtn">🏠︎</button>
+                                </div>
+                            </div>
+                            <div class="omeagle-chat-section">
+                                <div class="omeagle-messages" id="messages">
+                                    ${this.messages.map(msg => `
+                                        <div class="omeagle-message ${msg.senderId === this.userId ? 'me' : 'stranger'}">
+                                            ${msg.text}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <form class="omeagle-input-section" id="messageForm">
+                                    <input type="text" id="messageInput" placeholder="Type your message..." class="omeagle-input">
+                                    <button type="submit" class="omeagle-send-btn">Send</button>
+                                </form>
+                            </div>
+                        </div>
+                    `;
+
+                    if (this.localStream) {
+                        const localVideo = document.getElementById('localVideo');
+                        if (localVideo) localVideo.srcObject = this.localStream;
+                    }
+
+                    if (this.remoteStream) {
+                        const remoteVideo = document.getElementById('remoteVideo');
+                        if (remoteVideo) remoteVideo.srcObject = this.remoteStream;
+                    }
+
+                    const messageForm = document.getElementById('messageForm');
+                    if (messageForm) {
+                        messageForm.onsubmit = (e) => {
+                            e.preventDefault();
+                            const input = document.getElementById('messageInput');
+                            this.sendMessage(input.value);
+                            input.value = '';
+                        };
+                    }
+
+                    const muteBtn = document.getElementById('muteBtn');
+                    if (muteBtn) muteBtn.onclick = () => this.toggleMute();
+
+                    const nextBtn = document.getElementById('nextBtn');
+                    if (nextBtn) nextBtn.onclick = () => this.handleNext();
+
+                    const stopBtn = document.getElementById('stopBtn');
+                    if (stopBtn) stopBtn.onclick = () => this.handleStop();
+
+                    const messagesDiv = document.getElementById('messages');
+                    if (messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }
             }
         }
-        function cleanUpRTC() {
-            if (peerConnection) peerConnection.close();
-            peerConnection = null;
-            remoteVideo.srcObject = null;
-            remoteContainer.classList.remove('camera-on');
-            remoteStatus.classList.remove('active');
-            reportBtn.style.display = 'none';
-            chatInput.disabled = true;
-            sendBtn.disabled = true;
-            updateStatus('Looking for someone...');
-        }
-        // --- BUTTON CLICKS & EVENTS ---
-        startButton.addEventListener('click', async () => {
-            isDemoMode = demoMode.checked;
-            landingPage.style.display = 'none';
-            chatPage.style.display = 'block';
-            currentRegion.innerHTML = regionSelect.innerHTML;
-            currentRegion.value = regionSelect.value;
-            await updateDevices();
-            await startLocalStream();
-            navigator.mediaDevices.ondevicechange = updateDevices;
-            connect();
-        });
-        sendBtn.addEventListener('click', () => {
-            const text = chatInput.value.trim();
-            if (text && ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: 'message', text }));
-                addMessage('you', text);
-                chatInput.value = '';
-            }
-        });
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendBtn.click();
-        });
-        nextBtn.addEventListener('click', () => {
-            if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'dis' }));
-            cleanUpRTC();
-            chatMessages.innerHTML = '';
-            if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'find', region: currentRegion.value }));
-            addMessage('system', 'Searching...');
-        });
-        stopBtn.addEventListener('click', () => location.reload());
-        cameraSelect.addEventListener('change', startLocalStream);
-        micSelect.addEventListener('change', startLocalStream);
-        currentRegion.addEventListener('change', () => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: 'find', region: currentRegion.value }));
-                addMessage('system', 'Region changed. Searching again...');
-            }
-        });
-        // Report Logic
-        reportBtn.addEventListener('click', () => reportModal.classList.add('show'));
-        cancelReport.addEventListener('click', () => reportModal.classList.remove('show'));
-        confirmReport.addEventListener('click', () => {
-            reportModal.classList.remove('show');
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: 'report' }));
-                addMessage('system', 'User reported.');
-            }
-        });
+
+        // Initialize app
+        const app = new OmeagleApp();
     </script>
 </body>
 </html>
